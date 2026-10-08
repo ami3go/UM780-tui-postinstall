@@ -210,7 +210,7 @@ class InventoryCLITests(unittest.TestCase):
     def test_inventory_reports_all_categories_not_only_defaults(self):
         output=io.StringIO()
         with mock.patch.object(cli.inventory,'scan',side_effect=lambda names,cfg: {
-                name:inventory.ComponentState(name,False,False,None,'test') for name in names}) as scanner, \\
+                name:inventory.ComponentState(name,False,False,None,'test') for name in names}) as scanner, \
              redirect_stdout(output):
             result=cli.main(['--inventory'])
         self.assertEqual(result,0)
@@ -221,7 +221,7 @@ class InventoryCLITests(unittest.TestCase):
     def test_inventory_json_only_one_module(self):
         output=io.StringIO()
         with mock.patch.object(cli.inventory,'scan',return_value={
-            'btop':inventory.ComponentState('btop',True,True,None,'no setup')}) as scanner, \\
+            'btop':inventory.ComponentState('btop',True,True,None,'no setup')}) as scanner, \
              redirect_stdout(output):
             result=cli.main(['--inventory','--json','--component','btop'])
         self.assertEqual(result,0)
@@ -231,7 +231,7 @@ class InventoryCLITests(unittest.TestCase):
 
     def test_inventory_stage_includes_unchecked_optional_tools(self):
         output=io.StringIO()
-        with mock.patch.object(cli.inventory,'scan',return_value={}) as scanner, \\
+        with mock.patch.object(cli.inventory,'scan',return_value={}) as scanner, \
              redirect_stdout(output):
             result=cli.main(['--inventory','--stage','4'])
         self.assertEqual(result,0)
