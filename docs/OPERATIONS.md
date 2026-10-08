@@ -193,3 +193,8 @@ Never format or wipe a device to fix a mount problem. Escalate unknown storage o
 ## Staged component operations
 
 Run `python3 install.py --list-stages` to review all categorized software. `sudo python3 install.py --apply --stage N` applies only currently default-selected components of phase N; it does not silently install optional services. `--plan --stage N` is read-only and includes manual setup and prerequisite guidance; `--health --stage N` provides the existing read-only checks for the same selection. Use [the five-stage guide](INSTALL_STAGES.md) to validate exit criteria before moving to the next phase.
+
+
+## Installed/configured inventory
+
+Run `python3 install.py --inventory` or `python3 install.py --inventory --stage 3` for a read-only overview of installed binaries/packages, managed configuration and current service activity. JSON is available as `python3 install.py --inventory --json`. The installation plan and staged TUI include these current statuses, and each successful apply run records a post-install observation in `/var/lib/llm-postinstall/last-run.json`. Inventory is not a service login, GPU offload or backup restore test. See [inventory guide](INSTALL_INVENTORY.md).
