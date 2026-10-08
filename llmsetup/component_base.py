@@ -15,7 +15,8 @@ from .storage import configure_storage
 ALL = ['base', 'storage', 'vulkan', 'llama', 'ollama', 'webui', 'models',
        'cockpit', 'cockpit_ghsync', 'cockpit_bookmarks', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks',
        'fish', 'btop', 'mc', 'ttyd', 'agent_of_empires', 'jupyterlab', 'vnc', 'novnc', 'bookmark_sync', 'hardware_health', 'backup_restore',
-       'cockpit_storage', 'service_watchdog', 'developer_tools', 'llm_benchmark', 'zram']
+       'cockpit_storage', 'service_watchdog', 'developer_tools', 'llm_benchmark', 'zram', 'opencode', 'llama_swap', 'uptime_kuma',
+       'secure_ingress', 'ups_wol']
 DESCRIPTIONS = {
  'base': 'System utilities, SSH and prerequisite packages',
  'storage': 'Optional existing second-SSD mount (typed UUID approval)',
@@ -47,7 +48,12 @@ DESCRIPTIONS = {
  'service_watchdog': 'Read-only periodic systemd service health journal alerts',
  'developer_tools': 'Git/terminal tools rg, fd, fzf, lazygit, zoxide',
  'llm_benchmark': 'Compare llama.cpp CPU and Vulkan token throughput with an existing GGUF',
- 'zram': 'Debian compressed RAM swap via zram-tools'
+ 'zram': 'Debian compressed RAM swap via zram-tools',
+ 'opencode': 'Verified OpenCode coding-agent CLI, no daemon or auth setup',
+ 'llama_swap': 'Verified llama-swap model router binary, no listener',
+ 'uptime_kuma': 'Pinned native Uptime Kuma on localhost:3001, first-login admin',
+ 'secure_ingress': 'Inspect enrolled Tailscale identity, manual HTTPS Serve setup',
+ 'ups_wol': 'Prepare Cockpit UPS/WOL sources for reviewed dry-run installation'
 }
 
 
