@@ -96,6 +96,11 @@ def diagnostics(components=None):
         ok = pkg.is_file() and cli.is_file() and not pkg.is_symlink() and not cli.is_symlink()
         result.append(('PASS' if ok else 'WARN', 'cockpit-ghsync',
                        'Cockpit page and CLI installed; GitHub auth is per user and not tested'))
+    if 'bookmark_sync' in components:
+        pkg = Path('/usr/share/cockpit/cockpit-bookmarks/manifest.json')
+        config = Path('/etc/cockpit/cockpit-bookmarks.json')
+        result.append(('PASS' if pkg.is_file() and config.is_file() else 'WARN',
+                       'bookmark-sync', 'file presence only; links and tunnels not tested'))
     if 'cockpit_bookmarks' in components:
         pkg = Path('/usr/share/cockpit/cockpit-bookmarks/manifest.json')
         ok = pkg.is_file() and not pkg.is_symlink()
