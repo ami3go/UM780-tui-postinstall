@@ -14,7 +14,8 @@ from .storage import configure_storage
 
 ALL = ['base', 'storage', 'vulkan', 'llama', 'ollama', 'webui', 'models',
        'cockpit', 'cockpit_ghsync', 'cockpit_bookmarks', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks',
-       'fish', 'btop', 'mc', 'ttyd', 'agent_of_empires', 'jupyterlab', 'vnc', 'novnc', 'bookmark_sync']
+       'fish', 'btop', 'mc', 'ttyd', 'agent_of_empires', 'jupyterlab', 'vnc', 'novnc', 'bookmark_sync', 'hardware_health', 'backup_restore',
+       'cockpit_storage', 'service_watchdog', 'developer_tools', 'llm_benchmark', 'zram']
 DESCRIPTIONS = {
  'base': 'System utilities, SSH and prerequisite packages',
  'storage': 'Optional existing second-SSD mount (typed UUID approval)',
@@ -39,7 +40,14 @@ DESCRIPTIONS = {
  'jupyterlab': 'Local-only token-authenticated JupyterLab workspace',
  'vnc': 'Virtual XFCE desktop via TigerVNC (manual activation)',
  'novnc': 'Browser VNC proxy (manual activation after VNC)',
- 'bookmark_sync': 'Refresh Cockpit Bookmarks from installed applications'
+ 'bookmark_sync': 'Refresh Cockpit Bookmarks from installed applications',
+ 'hardware_health': 'SMART/NVMe/thermal monitoring and baseline report',
+ 'backup_restore': 'Restic backup CLI; timed backups only with verified external repository',
+ 'cockpit_storage': 'Cockpit storage and package update pages',
+ 'service_watchdog': 'Read-only periodic systemd service health journal alerts',
+ 'developer_tools': 'Git/terminal tools rg, fd, fzf, lazygit, zoxide',
+ 'llm_benchmark': 'Compare llama.cpp CPU and Vulkan token throughput with an existing GGUF',
+ 'zram': 'Debian compressed RAM swap via zram-tools'
 }
 
 
