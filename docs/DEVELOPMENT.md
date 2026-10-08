@@ -28,6 +28,7 @@ Do not run the real `--apply` command in developer CI or on a workstation whose 
 | `llmsetup/storage.py` | Read-only discovery and consented `fstab` + mount |
 | `llmsetup/component_base.py` | Installer registry names, dependencies, base/Vulkan/llama |
 | `llmsetup/component_llms.py` | Ollama, uv/Open WebUI, Qwen model |
+| `llmsetup/component_bookmarks_auto.py` | Installed-app discovery, additive Cockpit Bookmarks config merge, atomic writes and backups |
 | `llmsetup/component_optional_tools.py` | Optional Debian utilities, verified binaries and local-only Jupyter/VNC/ttyd units |
 | `llmsetup/component_cockpit_plugins.py` | Pinned GitHub Sync system files and verified Bookmarks Debian release |
 | `llmsetup/component_addons.py` | Cockpit, Quantum, code-server, Tailscale, updates, diagnostics |
@@ -49,6 +50,10 @@ Do not run the real `--apply` command in developer CI or on a workstation whose 
 ## Optional Cockpit extension rules
 
 Plugin install code must preserve existing local Cockpit apps; verify upstream source/package identity, stage writes when possible, record installed files, and refuse to overwrite unmanaged paths. Keep GitHub CLI authorization, scheduled sync, and Bookmarks terminal launchers manual. See [Cockpit plugins](COCKPIT_PLUGINS.md) and `tests/test_cockpit_plugins.py`.
+
+## Bookmarks synchronization rules
+
+Do not overwrite user-managed bookmark IDs, names, URLs, history or preferences, even if a generated entry was edited. Keep future-schemas and malformed JSON fail-closed. Preserve original ownership/mode, check before atomic replace, and keep actual modifications out of `--plan` and `--health`. New terminal app templates must be non-root, loopback-only and opt-in on click. Add fixtures in `tests/test_bookmarks_auto.py` and update [Bookmarks auto-configuration](BOOKMARKS_AUTO.md) for every schema change. Remember that Cockpit browser edits use separate optimistic file tags; the installer lock is only advisory.
 
 ## Optional tool constraints
 
