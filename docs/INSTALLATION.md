@@ -108,7 +108,16 @@ sudo python3 install.py --apply --component codeserver
 sudo python3 install.py --apply --component tailscale
 sudo python3 install.py --apply --component updates
 sudo python3 install.py --apply --component benchmarks
+# Optional host tools, selected by default only for fish/btop/mc:
+sudo python3 install.py --apply --component fish --component btop --component mc
+# See OPTIONAL_TOOLS.md before enabling web terminal / notebooks / VNC:
+sudo python3 install.py --apply --component ttyd
+sudo python3 install.py --apply --component agent_of_empires
+sudo python3 install.py --apply --component jupyterlab
+sudo python3 install.py --apply --component vnc --component novnc
 ```
+
+The higher-exposure tools ttyd, Agent of Empires, JupyterLab, VNC and noVNC are not preselected in `config.json`. The VNC and ttyd/noVNC services are not enabled automatically. Read [Optional Tools](OPTIONAL_TOOLS.md) before activation.
 
 GitHub Sync and Bookmarks become pages in Cockpit with no extra always-on listener. GitHub Sync needs per-user `gh auth login`, and Bookmarks terminal launchers stay unconfigured by this installer. See [Cockpit plugins](COCKPIT_PLUGINS.md).
 
