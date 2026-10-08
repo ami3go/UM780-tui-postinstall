@@ -134,11 +134,19 @@ def cockpit_ghsync(r, cfg, ui):
     if not source.exists():
         r.run(['git', 'clone', '--no-checkout', GHSYNC_REPOSITORY, str(source)])
         r.run(['git', '-C', str(source), 'checkout', '--detach', GHSYNC_SHA])
-    elif not (source / '.git').is_dir():
-        raise SetupError('Existing source checkout is not a Git repository')
+    elif source.is_symlink() or not (source / '.git').is_dir():
+        raise SetupError('Existing source checkout is not a trusted Git directory')
     rev = r.run(['git', '-C', str(source), 'rev-parse', 'HEAD'], capture=True).stdout.strip()
     if rev != GHSYNC_SHA:
         raise SetupError('GitHub Sync source revision does not match audited pin')
+    origin = r.run(['git', '-C', str(source), 'remote', 'get-url', 'origin'],
+                   capture=True).stdout.strip()
+    if origin != GHSYNC_REPOSITORY:
+        raise SetupError('GitHub Sync source origin differs from trusted repository')
+    dirty = r.run(['git', '-C', str(source), 'status', '--porcelain'],
+                  capture=True).stdout.strip()
+    if dirty:
+        raise SetupError('Pinned GitHub Sync checkout has local modifications; refusing execution')
     if not (source / 'install.sh').is_file():
         raise SetupError('Pinned GitHub Sync install.sh missing')
     with tempfile.TemporaryDirectory(prefix='cockpit-ghsync-', dir=ROOT_DIR) as stage:
