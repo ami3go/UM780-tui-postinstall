@@ -68,7 +68,7 @@ sudo python3 install.py --health
 | `vnc` | Optional TigerVNC virtual XFCE desktop, **not started**; password required |
 | `novnc` | Optional local noVNC proxy, **not started** until VNC is configured |
 
-The default `config.json` selects the original core components plus Fish, btop and Midnight Commander. The five higher-exposure optional tools (ttyd, Agent of Empires, JupyterLab, VNC and noVNC) start **unchecked**. The selected core modules the Qwen model. Dependencies are not installed implicitly by per-component reruns. Only the `models` module prompts before pulling a model; `--yes` accepts that prompt as well as the initial apply prompt, so review the plan first.
+The default `config.json` selects the original core components plus Fish, btop and Midnight Commander. The five additional components (ttyd, Agent of Empires, JupyterLab, VNC and noVNC) start **unchecked**. The selected core components still include the optional Qwen model download module. Dependencies are not installed implicitly by per-component reruns. Only the `models` module prompts before pulling a model; `--yes` accepts that prompt as well as the initial apply prompt, so review the plan first.
 
 ## Access model
 
