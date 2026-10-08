@@ -189,6 +189,27 @@ class StatusTests(unittest.TestCase):
         st=inventory.inspect('cockpit_bookmarks',{},p)
         self.assertEqual(st.status,'INSTALLED + CONFIGURED')
 
+    def test_model_probe_is_direct_loopback_only(self):
+        fake_response=mock.Mock()
+        fake_response.status=200
+        fake_response.getheader.return_value=None
+        fake_response.read.return_value=b'{"models":[{"name":"qwen2.5-coder:7b"}]}'
+        fake_connection=mock.Mock()
+        fake_connection.getresponse.return_value=fake_response
+        with mock.patch.object(inventory.http.client,'HTTPConnection',return_value=fake_connection) as conn:
+            result=inventory.LocalProbe().model_names()
+        conn.assert_called_once_with('127.0.0.1',11434,timeout=1.2)
+        fake_connection.request.assert_called_once_with('GET','/api/tags')
+        fake_connection.close.assert_called_once()
+        self.assertEqual(result,{'qwen2.5-coder:7b'})
+
+    def test_model_probe_returns_unknown_on_unreachable_socket(self):
+        connection=mock.Mock()
+        connection.request.side_effect=ConnectionRefusedError()
+        with mock.patch.object(inventory.http.client,'HTTPConnection',return_value=connection):
+            self.assertIsNone(inventory.LocalProbe().model_names())
+        connection.close.assert_called_once()
+
     def test_no_secret_is_exposed_in_json_output(self):
         p=FakeProbe()
         p.binaries.add('code-server')
