@@ -12,6 +12,7 @@ import sys
 import traceback
 from .core import CONF_DIR, STATE_DIR, Runner, SetupError, detect_target, is_root
 from .components import ALL, DESCRIPTIONS, INSTALLERS
+from .component_safety import restore_config_snapshot
 from . import health
 from .component_bookmarks_auto import auto_sync_bookmarks
 
@@ -166,9 +167,20 @@ def main(argv=None):
     p.add_argument('--apply', action='store_true', help='Execute selected modules')
     p.add_argument('--component', action='append', choices=ALL, help='Only selected module(s), repeatable')
     p.add_argument('--yes', action='store_true', help='Accept ordinary prompts; never bypass typed storage UUID')
+    p.add_argument('--restore-config', metavar='SNAPSHOT', help='Explicit config-only restore (requires typed RESTORE)')
     p.add_argument('--gguf', metavar='PATH', help='Use local GGUF inside selected model root and enable llama-server')
     args = p.parse_args(argv)
     try:
+        if args.restore_config:
+            if not is_root():
+                raise SetupError('Configuration restore requires root')
+            if not sys.stdin.isatty():
+                raise SetupError('Configuration restore requires an interactive terminal')
+            print('WARNING: config-only restore may overwrite live configuration; packages/disks are NOT rolled back.')
+            confirmation = input('Type RESTORE to continue: ').strip()
+            count = restore_config_snapshot(args.restore_config, confirmation)
+            print(f'Restored {count} configuration files. Review and restart affected services manually.')
+            return 0
         cfg = load_config(args.config)
         if args.gguf:
             cfg['llama_model_path'] = args.gguf
