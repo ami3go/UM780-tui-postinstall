@@ -168,7 +168,6 @@ After=network.target
 [Service]
 Type=simple
 User={VNC_USER}
-Group={VNC_USER}
 WorkingDirectory={VNC_HOME}
 Environment=HOME={VNC_HOME}
 Environment=XDG_CONFIG_HOME={VNC_HOME}/.config
