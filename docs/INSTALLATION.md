@@ -121,7 +121,7 @@ sudo python3 install.py --apply --component vnc --component novnc
 
 Successful module installs automatically append detected app entries to Cockpit Bookmarks when the plugin exists and `auto_bookmarks` is enabled. Each local-only web app link requires SSH port forwarding on the browser machine; on-demand terminal cards need ttyd installed. See [Bookmarks auto-configuration](BOOKMARKS_AUTO.md).
 
-The higher-exposure tools ttyd, Agent of Empires, JupyterLab, VNC and noVNC are not preselected in `config.json`. The VNC and ttyd/noVNC services are not enabled automatically. Read [Optional Tools](OPTIONAL_TOOLS.md) before activation.
+The higher-exposure tools ttyd, Agent of Empires, JupyterLab, VNC and noVNC are not preselected in `config.json`. The VNC template and ttyd remain disabled until manually activated. **Installing novnc now automatically enables a separate dedicated :2 VNC desktop and the localhost browser proxy**, with generated credentials. See [noVNC Desktop](NOVNC_DESKTOP.md). Read [Optional Tools](OPTIONAL_TOOLS.md) before activation.
 
 GitHub Sync and Bookmarks become pages in Cockpit with no extra always-on listener. GitHub Sync needs per-user `gh auth login`, and Bookmarks terminal launchers stay unconfigured by this installer. See [Cockpit plugins](COCKPIT_PLUGINS.md).
 
