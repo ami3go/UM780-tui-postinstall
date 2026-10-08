@@ -111,10 +111,14 @@ def build_snapshot(path, files):
 
 
 def config_snapshot(r, cfg, ui):
-    """Capture root-only, file-level recovery evidence (not full rollback)."""
+    """Snapshot previous managed state; nothing to preserve on a clean host."""
+    files = _collect_snapshot_paths()
+    if not files:
+        print('No pre-existing managed configuration to snapshot; nothing changed.')
+        return
     time = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     path = SNAPSHOT_ROOT / ('um780-config-' + time + '.tar.gz')
-    manifest = build_snapshot(path, _collect_snapshot_paths())
+    manifest = build_snapshot(path, files)
     print('Private configuration snapshot: ' + str(path))
     print('Files preserved: ' + str(len(manifest['files'])) + '; restore is opt-in and not package rollback.')
 

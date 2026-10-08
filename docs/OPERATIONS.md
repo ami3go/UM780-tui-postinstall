@@ -188,3 +188,8 @@ There is no transactional rollback or `uninstall` command. `Runner.write` can cr
 For service trouble, stop the *specific* affected service, check journal, restore a known-good managed config backup **after inspecting the diff**, and run `systemctl daemon-reload`. Do not blindly replace `/etc/fstab` while mounted volumes are busy, and do not unmount a disk with active inference or file-manager processes.
 
 Never format or wipe a device to fix a mount problem. Escalate unknown storage or authentication failures rather than applying destructive workaround commands.
+
+
+## Staged component operations
+
+Run `python3 install.py --list-stages` to review all categorized software. `sudo python3 install.py --apply --stage N` applies only currently default-selected components of phase N; it does not silently install optional services. `--plan --stage N` is read-only and includes manual setup and prerequisite guidance; `--health --stage N` provides the existing read-only checks for the same selection. Use [the five-stage guide](INSTALL_STAGES.md) to validate exit criteria before moving to the next phase.

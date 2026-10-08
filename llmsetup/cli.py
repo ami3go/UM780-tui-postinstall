@@ -12,6 +12,7 @@ import sys
 import traceback
 from .core import CONF_DIR, STATE_DIR, Runner, SetupError, detect_target, is_root
 from .components import ALL, DESCRIPTIONS, INSTALLERS
+from .install_stages import STAGES, SETUP_NOTES, ordered_selection, selected_from_stages, manual_prerequisites
 from .component_safety import restore_config_snapshot
 from . import health
 from .component_bookmarks_auto import auto_sync_bookmarks
@@ -42,29 +43,55 @@ class UI:
         return input(message)
 
     def checklist(self, selected):
-        if shutil.which('whiptail') and sys.stdin.isatty():
-            args = ['whiptail', '--title', 'Debian 13 LLM Server Setup',
-                    '--checklist', 'Choose modules (SPACE toggles)', '23', '96', '14']
-            for component in ALL:
-                args += [component, DESCRIPTIONS[component], 'ON' if component in selected else 'OFF']
-            p = subprocess.run(args, stderr=subprocess.PIPE, text=True)
-            if p.returncode:
-                return None
-            names = shlex.split(p.stderr)
-            return [x for x in ALL if x in names]
-        print('\n=== Debian 13 LLM post-install setup (terminal menu) ===')
-        for i, name in enumerate(ALL, 1):
-            print(f' [{"x" if name in selected else " "}] {i:2d}. {name:12} {DESCRIPTIONS[name]}')
-        print('Enter module numbers to toggle, separated by commas; ENTER keeps selection; q cancels')
-        value = input('Selection: ').strip()
-        if value.lower() == 'q': return None
-        if value:
-            for item in value.split(','):
-                if not item.strip().isdigit() or int(item.strip()) not in range(1, len(ALL)+1):
-                    raise SetupError('Invalid module number: ' + item)
-                name = ALL[int(item.strip())-1]
-                selected = [x for x in selected if x != name] if name in selected else selected + [name]
-        return [x for x in ALL if x in selected]
+        """Five sequential category screens; Cancel aborts the entire wizard.
+
+        Unchecked entries stay unchecked; categorization never auto-selects.
+        """
+        selected = set(selected)
+        interactive = bool(shutil.which('whiptail') and sys.stdin.isatty())
+        for stage in STAGES:
+            print(f'\n=== STEP {stage.number}/{len(STAGES)}: {stage.name} ===')
+            print(stage.objective)
+            if interactive:
+                args = [
+                    'whiptail', '--title',
+                    f'Debian 13 Setup | Step {stage.number}/{len(STAGES)}',
+                    '--checklist', stage.name + ': SPACE toggles; ENTER continues',
+                    '23', '105', str(min(13, len(stage.components)))
+                ]
+                for name in stage.components:
+                    args += [name, DESCRIPTIONS[name],
+                             'ON' if name in selected else 'OFF']
+                p = subprocess.run(args, stderr=subprocess.PIPE, text=True, check=False)
+                if p.returncode:
+                    return None
+                try:
+                    chosen = set(shlex.split(p.stderr))
+                except ValueError as exc:
+                    raise SetupError('Invalid checklist response') from exc
+                if not chosen.issubset(stage.components):
+                    raise SetupError('Unexpected checklist component selection')
+                selected.difference_update(stage.components)
+                selected.update(chosen)
+            else:
+                for idx, name in enumerate(stage.components, 1):
+                    mark = 'x' if name in selected else ' '
+                    print(f' [{mark}] {idx:2d}. {name:20} {DESCRIPTIONS[name]}')
+                print('Toggle by numbers separated by commas; ENTER keeps, q cancels.')
+                value = input(f'Step {stage.number} selection: ').strip()
+                if value.lower() == 'q':
+                    return None
+                if value:
+                    for item in value.split(','):
+                        item = item.strip()
+                        if not item.isdigit() or not 1 <= int(item) <= len(stage.components):
+                            raise SetupError('Invalid module number for this step: ' + item)
+                        name = stage.components[int(item) - 1]
+                        if name in selected:
+                            selected.remove(name)
+                        else:
+                            selected.add(name)
+        return ordered_selection(selected)
 
 
 def load_config(path):
@@ -87,22 +114,46 @@ def load_config(path):
     return data
 
 
+def show_stages(cfg):
+    """Read-only catalog with effective default selection flags."""
+    selected = set(cfg['components'])
+    print('=== UM780 INSTALLATION STAGES (1 = essential, 5 = advanced) ===')
+    for stage in STAGES:
+        print(f'\nStep {stage.number}: {stage.name}')
+        print('  ' + stage.objective)
+        for name in stage.components:
+            flag = 'default' if name in selected else 'optional'
+            print(f'    {name:22} [{flag}] {DESCRIPTIONS[name]}')
+    print('\nUse --plan --stage N or --apply --stage N for defaults of one stage.')
+    print('Use --component NAME or the guided TUI to explicitly select optional tools.')
+
+
 def plan(cfg, chosen):
-    print('=== LLM SERVER POST-INSTALL: CHANGE PLAN ===')
-    print('Target: Debian 13 x86_64 bare metal. Python standard library; no Docker.')
-    print('Requested component order:')
-    for idx, name in enumerate(chosen, 1):
-        print(f' {idx:2d}. {name:12} {DESCRIPTIONS[name]}')
-    print('Safety: NO repartition, format, mkfs or destructive mount operations.')
-    print('Existing data disk mount is skipped unless partition UUID is typed exactly.')
-    print('Web UI, API, code-server, file manager and Cockpit bind to 127.0.0.1 only.')
-    print('Use SSH port forwards over LAN or Tailscale; do not expose unauthenticated Ollama API.')
-    print('Ollama may require >1 GB release download; WebUI has large dependencies.')
-    print('Qwen model download requires separate confirmation.')
-    print('Installed web apps and ttyd-backed tools can be added to Cockpit Bookmarks automatically.')
-    print('Bookmark links to localhost require browser-side SSH port forwards; no ports are opened.')
-    print('Optional browser terminal and VNC/noVNC require manual activation; no WAN binds are configured.')
-    print('Run with --health after setup. A llama-server service requires a local GGUF file.')
+    print('=== UM780 DEBIAN 13 STAGED CHANGE PLAN ===')
+    print('Target: Debian 13 x86_64 bare metal. Native systemd; no Docker.')
+    print('Execution follows stage priority and defined within-stage order.')
+    counter = 0
+    for stage in STAGES:
+        names = [name for name in stage.components if name in chosen]
+        if not names:
+            continue
+        print(f'\nSTEP {stage.number}/{len(STAGES)} — {stage.name}')
+        print('  ' + stage.objective)
+        for name in names:
+            counter += 1
+            print(f'  {counter:2d}. {name:20} {DESCRIPTIONS[name]}')
+            missing = manual_prerequisites(name, chosen)
+            if missing:
+                print('      Verify previously installed prerequisites: ' + ', '.join(missing))
+            if name in SETUP_NOTES:
+                print('      Setup: ' + SETUP_NOTES[name])
+    print(f'\nSelected modules: {counter} of {len(ALL)}.')
+    print('Safety: NO repartition, format, mkfs or implicit disk formatting.')
+    print('Existing SSD mount may require exact typed UUID; preserve backups.')
+    print('Prerequisites are advisory; they are NOT auto-installed or verified.')
+    print('Browser links to localhost require forwarding; no public ports added.')
+    print('First-login and security activation steps remain separate from installation.')
+    print('Run --health after setup; physical GPU/login/restore acceptance remains required.')
     print()
 
 
@@ -125,7 +176,15 @@ def execute(cfg, chosen, ui):
     status = {'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'results': {}, 'components': chosen}
     failures = 0
+    previous_stage = None
     for name in chosen:
+        current_stage = next(stage for stage in STAGES if name in stage.components)
+        if previous_stage != current_stage.number:
+            print(f'\n' + '='*64)
+            print(f'STEP {current_stage.number}/{len(STAGES)}: {current_stage.name}')
+            print(current_stage.objective)
+            runner.logger.info('BEGIN STAGE %s: %s', current_stage.number, current_stage.name)
+            previous_stage = current_stage.number
         print('\n' + '='*64 + f'\n[MODULE] {name}: {DESCRIPTIONS[name]}')
         runner.logger.info('START COMPONENT %s', name)
         try:
@@ -165,7 +224,9 @@ def main(argv=None):
     p.add_argument('--plan', action='store_true', help='Read-only change plan')
     p.add_argument('--health', action='store_true', help='Read-only local health checks')
     p.add_argument('--apply', action='store_true', help='Execute selected modules')
-    p.add_argument('--component', action='append', choices=ALL, help='Only selected module(s), repeatable')
+    p.add_argument('--component', action='append', choices=ALL, help='Explicit module selection; repeatable')
+    p.add_argument('--stage', action='append', type=int, choices=[s.number for s in STAGES], help='Install default-selected modules in priority stage N (1..5); repeatable')
+    p.add_argument('--list-stages', action='store_true', help='Read-only catalog of priorities, setup and optional modules')
     p.add_argument('--yes', action='store_true', help='Accept ordinary prompts; never bypass typed storage UUID')
     p.add_argument('--restore-config', metavar='SNAPSHOT', help='Explicit config-only restore (requires typed RESTORE)')
     p.add_argument('--gguf', metavar='PATH', help='Use local GGUF inside selected model root and enable llama-server')
@@ -184,7 +245,15 @@ def main(argv=None):
         cfg = load_config(args.config)
         if args.gguf:
             cfg['llama_model_path'] = args.gguf
-        chosen = [x for x in ALL if x in (args.component or cfg['components'])]
+        if args.stage and args.component:
+            raise SetupError('--stage and --component cannot be combined; use the TUI for custom selections')
+        if args.list_stages:
+            show_stages(cfg)
+            return 0
+        if args.stage:
+            chosen = selected_from_stages(args.stage, cfg['components'])
+        else:
+            chosen = ordered_selection(args.component or cfg['components'])
         if args.plan:
             plan(cfg, chosen)
             problems = detect_target()

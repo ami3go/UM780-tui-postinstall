@@ -103,3 +103,8 @@ Release should remain **pre-release** until all BLOCKER and HIGH safety gaps in 
 Use precise status words: `implemented` for code present, `unit-tested` for mocked tests, `integrated` for real end-to-end proof, and `verified on UM780 Pro` only with dated evidence. Avoid calling a service "read-only", "secure", "fully idempotent" or "GPU accelerated" without executable enforcement and relevant tests.
 
 Any stale docs that claim such guarantees should be updated in the same PR as the implementation.
+
+
+## Staged installer metadata contract
+
+Maintain `llmsetup/install_stages.py` as the sole canonical component order. All components must be assigned to exactly one of the five stages and registry coverage validated by `tests/test_install_stages.py`. The TUI displays stage groups; CLI `--stage N` selects **only** defaults from `config.json`. Preserve manual installation consent, UUID confirmation and public-listener protections; prerequisite notes are advisory, never implicit installs. Update [staged installation](INSTALL_STAGES.md) and [configuration](CONFIGURATION.md) when modules move between stages.

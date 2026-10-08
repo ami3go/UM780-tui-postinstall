@@ -8,7 +8,7 @@ This file describes the **current code behavior**, not proposed settings. The si
 | --- | --- | --- | --- |
 | `target_os` | `"debian-13"` | Yes | Must match exactly, not a general-purpose distro selector |
 | `host` | `"bare-metal"` | Yes | VMs and containers rejected by preflight |
-| `components` | 18 selected; 5 additional optional | Yes | TUI initially checks each item; see component order below |
+| `components` | 18 selected; 21 additional optional | Yes | TUI initially checks each item; see component order below |
 | `backup_repository` | Not set | Optional | Existing separately mounted Restic repository path; until configured module only installs CLI |
 | `auto_bookmarks` | `true` | Yes | After an apply run, merge missing application cards if Cockpit Bookmarks is installed; disable to opt out |
 | `model` | `"qwen2.5-coder:7b"` | Yes | For `models`, only prefixes `qwen2.5-coder:` and `qwen3-coder:` pass the current basic check |
@@ -19,44 +19,24 @@ This file describes the **current code behavior**, not proposed settings. The si
 
 Do **not** expect changing `webui_bind` or `tunnel_note` to change network listeners. Editing `model_storage` to an arbitrary path is **not** a supported safety-preserving way to mount disks. The current JSON parser does not fully validate arbitrary model paths on first run; use the interactive storage module instead.
 
-## Component names, default order, dependencies
+## Five prioritized installation stages
 
-The modules are evaluated in the following fixed order, even with several `--component` arguments:
+The canonical component order is defined in `llmsetup/install_stages.py` and drives **both TUI categories and actual execution order**. Modules are grouped as follows:
 
-| Order | Name | Must be in place first / operator prerequisite |
+| Step | Stage name | Component order |
 | ---: | --- | --- |
-| 1 | `base` | Initial Debian host, working APT |
-| 2 | `storage` | Inspect `lsblk -f` and backup; no automatic mkfs |
-| 3 | `vulkan` | Debian firmware repositories if needed |
-| 4 | `llama` | Native compiler packages installed by module; network and sources accessible |
-| 5 | `ollama` | Pre-created storage path and service user permissions |
-| 6 | `webui` | Python 3.11 downloaded via uv; Ollama expected for useful UI |
-| 7 | `models` | Ollama installed and running; prompts for multi-GB Qwen pull |
-| 8 | `cockpit` | APT reachable, SSH forwarding for access |
-| 9 | `cockpit_ghsync` | Cockpit module installed, signed-in user sets up `gh auth login`; no scheduler auto-enabled |
-| 10 | `cockpit_bookmarks` | Cockpit module installed; checksum-verified Bookmarks `.deb` and optional launcher security review |
-| 11 | `filebrowser` | Supported existing model storage and Quantum GitHub release asset |
-| 12 | `codeserver` | Upstream code-server release and Debian package dependencies |
-| 13 | `tailscale` | Official Tailscale Debian repository; manual `sudo tailscale up` |
-| 14 | `updates` | Debian APT security sources |
-| 15 | `benchmarks` | Sysbench / Vulkan command-line tools |
-| 16 | `fish` | Debian fish; does not change the login shell |
-| 17 | `btop` | Debian btop resource monitor |
-| 18 | `mc` | Debian mc file manager |
-| 19 | `ttyd` | Verified upstream static release; local-only disabled service |
-| 20 | `agent_of_empires` | Verified upstream CLI and tmux; no web daemon |
-| 21 | `jupyterlab` | Debian JupyterLab; localhost token-authenticated service |
-| 22 | `vnc` | TigerVNC/XFCE template; explicit user password and activation |
-| 23 | `novnc` | Turnkey TigerVNC/XFCE :2 with generated VncAuth password, active localhost web proxy and Cockpit bookmark |
-| 24 | `bookmark_sync` | Explicit idempotent Cockpit Bookmarks application rescan; auto-hook is on even when unchecked |
+| 1 | Essential system and data safety | `preflight`, `base`, `config_snapshot`, `storage`, `hardware_health`, `updates`, `zram` |
+| 2 | Local LLM engines and models | `vulkan`, `ollama`, `llama`, `models`, `webui`, `benchmarks`, `llm_benchmark`, `llama_swap` |
+| 3 | Administration and development | `cockpit`, `cockpit_storage`, `cockpit_ghsync`, `cockpit_bookmarks`, `cockpit_status`, `filebrowser`, `codeserver`, `fish`, `btop`, `mc`, `developer_tools`, `opencode`, `agent_of_empires`, `jupyterlab`, `ttyd` |
+| 4 | Remote access and virtual desktop | `tailscale`, `secure_ingress`, `vnc`, `novnc` |
+| 5 | Monitoring, backups and automation | `backup_restore`, `service_watchdog`, `uptime_kuma`, `ups_wol`, `bookmark_sync` |
 
-Seven additional unchecked maintenance modules: `hardware_health`, `backup_restore`, `cockpit_storage`, `service_watchdog`, `developer_tools`, `llm_benchmark`, and `zram`. See [Optional maintenance](OPTIONAL_MAINTENANCE.md) for installation and behavior.
+The 18 default-selected components in `config.json` remain unchanged. The other 21 modules are **unchecked** and are not selected by `--stage N`; select them individually with `--component` or in the staged TUI.
 
-Five additional unchecked native/integration modules: `opencode`, `llama_swap`, `uptime_kuma`, `secure_ingress`, `ups_wol`. See [Optional native apps](OPTIONAL_NATIVE_APPS.md).
+`--stage 1` is the suggested starting point for the first controlled deployment, followed by steps 2–5. Step 5 currently has no default-selected modules. `--stage` is repeatable and can be used with `--plan`, `--health`, or `--apply`. The two selectors `--stage` and `--component` cannot be combined in one command. For a mixed custom selection use the interactive TUI.
 
-Three additional unchecked safety modules are `preflight` and `config_snapshot` (both run *before* base/storage if selected) and `cockpit_status` (Cockpit plugin). The CLI also accepts `--restore-config PATH`, which requires an interactive typed confirmation and never restores packages. See [Optional safety](OPTIONAL_SAFETY.md).
+**Prerequisites are advisory, not a dependency installer.** The plan labels recommended earlier modules not chosen for the current invocation as "Verify previously installed prerequisites" because they could have been installed in an earlier stage. No automatic prerequisite installation, storage formatting, power-control arm, or external network publishing occurs. See [Staged installation](INSTALL_STAGES.md) for the full table, operator setup actions, and exit criteria.
 
-**No dependency resolver exists.** `--apply --component models` does not automatically install Ollama, for example. If you select multiple modules, only those modules are run; ordering follows the list above.
 
 ## CLI flags
 
@@ -66,7 +46,9 @@ Three additional unchecked safety modules are `preflight` and `config_snapshot` 
 | `--plan` | Print high-level plan; do not apply installations or mounts |
 | `--health` | Read-only service, Vulkan, mount and port checks (details in [Operations](OPERATIONS.md)) |
 | `--apply` | Skip module checklist and run chosen modules; root required |
-| `--component NAME` | Select one module; repeat flag for additional modules |
+| `--component NAME` | Select one module; repeat flag for additional modules; runs in canonical priority order |
+| `--stage N` | Select only default-enabled software in stage N (1–5); repeatable; cannot combine with `--component` |
+| `--list-stages` | Print all five categories, default/optional status and software descriptions; read-only |
 | `--yes` | Accept ordinary confirmation prompts including model downloads; **still must type UUID** if mounting |
 | `--gguf PATH` | Override the model path for the current `llama` invocation; existing `.gguf` under current model root |
 | `-h`, `--help` | Show CLI help |
@@ -74,6 +56,8 @@ Three additional unchecked safety modules are `preflight` and `config_snapshot` 
 Examples:
 
 ```sh
+python3 install.py --list-stages
+python3 install.py --plan --stage 1
 python3 install.py --plan
 python3 install.py --plan --component storage --component llama
 sudo python3 install.py --apply --component base

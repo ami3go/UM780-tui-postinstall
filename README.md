@@ -11,6 +11,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | [Optional safety and status](docs/OPTIONAL_SAFETY.md) | Preflight, private config snapshots/manual restore, Cockpit service overview |
 | [Optional native applications](docs/OPTIONAL_NATIVE_APPS.md) | OpenCode, llama-swap, Uptime Kuma, ingress readiness and UPS/WOL |
 | [Optional maintenance tools](docs/OPTIONAL_MAINTENANCE.md) | NVMe health, Restic, watchdog, zram, developer tools and model benchmarks |
+| [Five-stage installation workflow](docs/INSTALL_STAGES.md) | Priority 1–5 grouping, per-step setup order, prerequisites, verification and CLI examples |
 | [Installation](docs/INSTALLATION.md) | Prerequisites, staged install, selecting existing second NVMe, first login |
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
 | [Architecture](docs/ARCHITECTURE.md) | Modules, state, systemd and data flows, design constraints |
@@ -38,12 +39,14 @@ python3 -m unittest discover -s tests -v
 # Stage modules one at a time after reading docs/INSTALLATION.md:
 sudo python3 install.py --apply --component base
 sudo python3 install.py --apply --component vulkan
-# Interactive TUI / numbered fallback (selects every module by default):
+# Interactive staged TUI / numbered fallback (preserves 18 default selections):
 sudo python3 install.py
 sudo python3 install.py --health
 ```
 
-**Do not select the full default checklist until the known integration risks have been reviewed.** If `whiptail` is not yet installed, the installer uses a numbered text selection screen. The `--plan` command is a high-level read-only plan, **not** a full diff of package, fstab or service changes. Use `--component` to reduce scope; dependencies are not automatically resolved.
+**Installation priorities:** To install in controlled phases, run `python3 install.py --list-stages`, then `python3 install.py --plan --stage 1` and `sudo python3 install.py --apply --stage 1`, followed by stages 2–5. `--stage N` selects only modules already enabled in `config.json`; optional tools remain unchecked. The interactive TUI has five category screens. See [Staged installation](docs/INSTALL_STAGES.md).
+
+**Do not select the full default checklist until the known integration risks have been reviewed.** If `whiptail` is not yet installed, the installer uses a numbered text selection screen. The `--plan` command is a high-level read-only plan, **not** a full diff of package, fstab or service changes. Use `--component` to reduce scope; dependencies are not automatically resolved. The staged plan displays advisory prerequisites, but will never auto-select optional tools.
 
 ## Available components
 

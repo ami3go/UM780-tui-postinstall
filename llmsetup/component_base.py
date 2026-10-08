@@ -11,12 +11,9 @@ import urllib.request
 from .core import (CONF_DIR, OWNER_MARK, ROOT_DIR, STATE_DIR, SetupError,
                    ensure_dir, github_asset, install_release_asset, stable_secret)
 from .storage import configure_storage
+from .install_stages import ORDER
 
-ALL = ['preflight', 'config_snapshot', 'base', 'storage', 'vulkan', 'llama', 'ollama', 'webui', 'models',
-       'cockpit', 'cockpit_ghsync', 'cockpit_bookmarks', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks',
-       'fish', 'btop', 'mc', 'ttyd', 'agent_of_empires', 'jupyterlab', 'vnc', 'novnc', 'bookmark_sync', 'hardware_health', 'backup_restore',
-       'cockpit_storage', 'service_watchdog', 'developer_tools', 'llm_benchmark', 'zram', 'opencode', 'llama_swap', 'uptime_kuma',
-       'secure_ingress', 'ups_wol', 'cockpit_status']
+ALL = list(ORDER)
 DESCRIPTIONS = {
  'preflight': 'Read-only disk, model root and Cockpit safety diagnostics',
  'config_snapshot': 'Root-private, SHA-verified configuration backup (manual restore only)',
