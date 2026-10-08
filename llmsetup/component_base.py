@@ -12,12 +12,14 @@ from .core import (CONF_DIR, OWNER_MARK, ROOT_DIR, STATE_DIR, SetupError,
                    ensure_dir, github_asset, install_release_asset, stable_secret)
 from .storage import configure_storage
 
-ALL = ['base', 'storage', 'vulkan', 'llama', 'ollama', 'webui', 'models',
+ALL = ['preflight', 'config_snapshot', 'base', 'storage', 'vulkan', 'llama', 'ollama', 'webui', 'models',
        'cockpit', 'cockpit_ghsync', 'cockpit_bookmarks', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks',
        'fish', 'btop', 'mc', 'ttyd', 'agent_of_empires', 'jupyterlab', 'vnc', 'novnc', 'bookmark_sync', 'hardware_health', 'backup_restore',
        'cockpit_storage', 'service_watchdog', 'developer_tools', 'llm_benchmark', 'zram', 'opencode', 'llama_swap', 'uptime_kuma',
-       'secure_ingress', 'ups_wol']
+       'secure_ingress', 'ups_wol', 'cockpit_status']
 DESCRIPTIONS = {
+ 'preflight': 'Read-only disk, model root and Cockpit safety diagnostics',
+ 'config_snapshot': 'Root-private, SHA-verified configuration backup (manual restore only)',
  'base': 'System utilities, SSH and prerequisite packages',
  'storage': 'Optional existing second-SSD mount (typed UUID approval)',
  'vulkan': 'AMD firmware, Mesa/Vulkan driver + diagnostics',
@@ -53,7 +55,8 @@ DESCRIPTIONS = {
  'llama_swap': 'Verified llama-swap model router binary, no listener',
  'uptime_kuma': 'Pinned native Uptime Kuma on localhost:3001, first-login admin',
  'secure_ingress': 'Inspect enrolled Tailscale identity, manual HTTPS Serve setup',
- 'ups_wol': 'Prepare Cockpit UPS/WOL sources for reviewed dry-run installation'
+ 'ups_wol': 'Prepare Cockpit UPS/WOL sources for reviewed dry-run installation',
+ 'cockpit_status': 'Cockpit Tools status page; read-only systemd service overview'
 }
 
 
