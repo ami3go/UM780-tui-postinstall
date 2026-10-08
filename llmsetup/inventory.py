@@ -14,7 +14,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from .core import CONF_DIR, ROOT_DIR
+from .core import CONF_DIR, ROOT_DIR, safe_model
 from .install_stages import ORDER
 
 CONFIG_ROOT = Path('/etc/llm-postinstall')
@@ -240,6 +240,16 @@ def _file_contains(probe, path, *words):
     return txt is not None and all(w in txt for w in words)
 
 
+def _env_value(probe, path, key):
+    """Return one active KEY=value assignment; comments/duplicates do not count."""
+    txt = probe.text(path)
+    if txt is None:
+        return None
+    values = [line.partition('=')[2].strip() for line in txt.splitlines()
+              if line.startswith(key + '=')]
+    return values[0] if len(values) == 1 and values[0] else None
+
+
 def _managed_unit(probe, name):
     return probe.unit(name) and _file_contains(
         probe, UNIT_ROOT / name, '# Managed by debian-llm-postinstall')
@@ -279,13 +289,14 @@ def configured(name, probe, cfg, installed):
     if name == 'vulkan':
         return probe.command(['vulkaninfo', '--summary'], timeout=5)[0] if installed else False
     if name == 'llama':
-        return (_managed_unit(probe, 'llm-llama.service') and
-                _file_contains(probe, CONFIG_ROOT / 'llama.env', 'LLAMA_MODEL=') and
-                any(line.startswith('LLAMA_MODEL=') and line.partition('=')[2].strip()
-                    for line in (probe.text(CONFIG_ROOT / 'llama.env') or '').splitlines()))
+        model = _env_value(probe, CONFIG_ROOT / 'llama.env', 'LLAMA_MODEL')
+        root = Path(cfg.get('model_storage', '/var/lib/llm-stack/models')) / 'gguf'
+        return bool(_managed_unit(probe, 'llm-llama.service') and model and
+                    safe_model(model, str(root)))
     if name == 'ollama':
         return (_managed_unit(probe, 'llm-ollama.service') and
-                _file_contains(probe, CONFIG_ROOT / 'ollama.env', 'OLLAMA_HOST=127.0.0.1:11434'))
+                _env_value(probe, CONFIG_ROOT / 'ollama.env', 'OLLAMA_HOST')
+                == '127.0.0.1:11434')
     if name == 'models':
         names = probe.model_names() if installed else None
         if names is None:
@@ -293,8 +304,12 @@ def configured(name, probe, cfg, installed):
         return cfg.get('model', 'qwen2.5-coder:7b') in names
     if name == 'webui':
         return (_managed_unit(probe, 'llm-webui.service') and
-                _file_contains(probe, CONFIG_ROOT / 'webui.env',
-                               'OLLAMA_BASE_URL=http://127.0.0.1:11434', 'WEBUI_AUTH=True'))
+                _env_value(probe, CONFIG_ROOT / 'webui.env', 'OLLAMA_BASE_URL')
+                == 'http://127.0.0.1:11434' and
+                _env_value(probe, CONFIG_ROOT / 'webui.env', 'WEBUI_AUTH')
+                == 'True' and
+                _env_value(probe, CONFIG_ROOT / 'webui.env', 'ENABLE_SIGNUP')
+                == 'False')
     if name == 'cockpit':
         return _private_cockpit(probe) and probe.enabled('cockpit.socket')
     if name == 'cockpit_storage':
@@ -317,7 +332,7 @@ def configured(name, probe, cfg, installed):
                                '127.0.0.1', '/var/lib/filebrowser/database.db'))
     if name == 'codeserver':
         return (_managed_unit(probe, 'llm-codeserver.service') and
-                _file_contains(probe, '/etc/llm-postinstall/codeserver.env', 'PASSWORD=') and
+                bool(_env_value(probe, '/etc/llm-postinstall/codeserver.env', 'PASSWORD')) and
                 _file_contains(probe, UNIT_ROOT / 'llm-codeserver.service', '127.0.0.1:8443'))
     if name == 'tailscale':
         ok, raw = probe.command(['tailscale', 'status', '--json'])
