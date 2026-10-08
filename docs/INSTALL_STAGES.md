@@ -12,7 +12,7 @@ Goal: establish a stable Debian foundation, inspect both NVMe SSDs, then add saf
 | ---: | --- | :---: | --- | --- |
 | 1.1 | `preflight` | No | Read-only storage path, free-space, OS and Cockpit checks | Resolve warnings before applying further changes |
 | 1.2 | `base` | Yes | APT, Git, Python, SSH, base utilities | Check SSH access, package sources, Debian 13 |
-| 1.3 | `config_snapshot` | No | Save previous managed configurations in root-only hashed archive | For existing installs: test explicit recovery; no package rollback |
+| 1.3 | `config_snapshot` | No | Save previous managed configurations in root-only hashed archive | If no previous config exists, safely skip; otherwise test recovery (no package rollback) |
 | 1.4 | `storage` | Yes | Offer to mount a **pre-existing** second SSD filesystem | Confirm physical disk/UUID, mount and model path; never format |
 | 1.5 | `hardware_health` | No | nvme-cli, SMART and thermal tools; capture baseline | Inspect SSD temperature, wear and media errors |
 | 1.6 | `updates` | Yes | Debian security update timer | Check apt source, journal and no unattended reboot |
