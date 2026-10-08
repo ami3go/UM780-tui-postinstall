@@ -28,6 +28,12 @@ Reviewed against `main` source on **2026-10-08**. This is a transparent engineer
 | CI-01 | **MEDIUM** | Test coverage | CI compiles Python, runs mocked unittests and a plan command on Ubuntu, not Debian systemd on UM780 Pro. | Debian test VM/container where practical; supervised real-machine CI gate for hardware functions |
 | PERF-01 | **LOW** | Benchmark terminology | `benchmarks` writes CPU/sysbench and Vulkan summaries, not tokens/sec benchmarks. | Separate model benchmark command/evidence and performance thresholds |
 
+## Optional safety / status limitations
+
+- `preflight` checks model root and basic disk space, but does not solve all complex SSD topology, mounted UUID identity or interface listener risks already documented above.
+- `config_snapshot` preserves allowlisted installer configurations with verified hashes and an explicit interactive restore command. It is **not** whole-system rollback; restore cannot reverse APT packages, service state, model data or migrations. Snapshots contain secrets, stored root-only.
+- `cockpit_status` is a static read-only systemd overview. An active process is not proof of functional login, inference, backups, or security. Do not confuse the dashboard with a full hardware acceptance test.
+
 ## Optional native integration limitations
 
 - `uptime_kuma`: pinned v2.5.0 instead of broken upstream native 2.5.1; Node/npm installation and first-login authentication are unverified on Debian 13 target. Node modules may execute upstream install scripts.

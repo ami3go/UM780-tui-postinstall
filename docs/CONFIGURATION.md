@@ -54,6 +54,8 @@ Seven additional unchecked maintenance modules: `hardware_health`, `backup_resto
 
 Five additional unchecked native/integration modules: `opencode`, `llama_swap`, `uptime_kuma`, `secure_ingress`, `ups_wol`. See [Optional native apps](OPTIONAL_NATIVE_APPS.md).
 
+Three additional unchecked safety modules are `preflight` and `config_snapshot` (both run *before* base/storage if selected) and `cockpit_status` (Cockpit plugin). The CLI also accepts `--restore-config PATH`, which requires an interactive typed confirmation and never restores packages. See [Optional safety](OPTIONAL_SAFETY.md).
+
 **No dependency resolver exists.** `--apply --component models` does not automatically install Ollama, for example. If you select multiple modules, only those modules are run; ordering follows the list above.
 
 ## CLI flags
