@@ -11,6 +11,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | [Optional safety and status](docs/OPTIONAL_SAFETY.md) | Preflight, private config snapshots/manual restore, Cockpit service overview |
 | [Optional native applications](docs/OPTIONAL_NATIVE_APPS.md) | OpenCode, llama-swap, Uptime Kuma, ingress readiness and UPS/WOL |
 | [Optional maintenance tools](docs/OPTIONAL_MAINTENANCE.md) | NVMe health, Restic, watchdog, zram, developer tools and model benchmarks |
+| [Installed/configured software inventory](docs/INSTALL_INVENTORY.md) | Check all 39 modules before installation, inside TUI, and after each apply |
 | [Five-stage installation workflow](docs/INSTALL_STAGES.md) | Priority 1–5 grouping, per-step setup order, prerequisites, verification and CLI examples |
 | [Installation](docs/INSTALLATION.md) | Prerequisites, staged install, selecting existing second NVMe, first login |
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
@@ -34,6 +35,7 @@ sudo apt update
 sudo apt install -y git python3
 git clone https://github.com/ami3go/UM780-tui-postinstall.git
 cd UM780-tui-postinstall
+python3 install.py --inventory  # inspect installed/configured state read-only
 python3 install.py --plan
 python3 -m unittest discover -s tests -v
 # Stage modules one at a time after reading docs/INSTALLATION.md:
@@ -44,9 +46,11 @@ sudo python3 install.py
 sudo python3 install.py --health
 ```
 
+**Existing software detection:** Run `python3 install.py --inventory` for all 39 modules, or `python3 install.py --inventory --stage 2` to inspect one stage including optional software. Add `--json` for machine-readable output. The TUI and installation plans now show installed/configured states and services' running state; successful module runs record verification evidence in the last-run report. Detection does not automatically skip installers or prove logins, GPU offload or backups. See [Inventory](docs/INSTALL_INVENTORY.md).
+
 **Installation priorities:** To install in controlled phases, run `python3 install.py --list-stages`, then `python3 install.py --plan --stage 1` and `sudo python3 install.py --apply --stage 1`, followed by stages 2–5. `--stage N` selects only modules already enabled in `config.json`; optional tools remain unchecked. The interactive TUI has five category screens. See [Staged installation](docs/INSTALL_STAGES.md).
 
-**Do not select the full default checklist until the known integration risks have been reviewed.** If `whiptail` is not yet installed, the installer uses a numbered text selection screen. The `--plan` command is a high-level read-only plan, **not** a full diff of package, fstab or service changes. Use `--component` to reduce scope; dependencies are not automatically resolved. The staged plan displays advisory prerequisites, but will never auto-select optional tools.
+**Do not select the full default checklist until the known integration risks have been reviewed.** If `whiptail` is not yet installed, the installer uses a numbered text selection screen. The `--plan` command is a high-level read-only plan, **not** a full diff of package, fstab or service changes. Use `--component` to reduce scope; dependencies are not automatically resolved. The inventory checks installed/configured/running evidence without changing the host, and the staged plan displays advisory prerequisites, but will never auto-select optional tools.
 
 ## Available components
 
