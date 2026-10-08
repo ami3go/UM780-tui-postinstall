@@ -89,6 +89,17 @@ def diagnostics(components=None):
         if comp in components:
             ok = check_port('127.0.0.1', port)
             result.append(('PASS' if ok else 'WARN', comp + ' port', f'127.0.0.1:{port}'))
+    if 'cockpit_ghsync' in components:
+        pkg = Path('/usr/share/cockpit/ghsync/manifest.json')
+        cli = Path('/usr/local/bin/ghsync')
+        ok = pkg.is_file() and cli.is_file() and not pkg.is_symlink() and not cli.is_symlink()
+        result.append(('PASS' if ok else 'WARN', 'cockpit-ghsync',
+                       'Cockpit page and CLI installed; GitHub auth is per user and not tested'))
+    if 'cockpit_bookmarks' in components:
+        pkg = Path('/usr/share/cockpit/cockpit-bookmarks/manifest.json')
+        ok = pkg.is_file() and not pkg.is_symlink()
+        result.append(('PASS' if ok else 'WARN', 'cockpit-bookmarks',
+                       'Cockpit page installed; config, login and launchers are not tested'))
     if 'tailscale' in components:
         ok, out = probe(['tailscale', 'status', '--json'])
         status = 'WARN'

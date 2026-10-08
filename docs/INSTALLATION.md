@@ -101,12 +101,16 @@ Use one module at a time until each returns a meaningful result:
 ```sh
 sudo python3 install.py --apply --component webui
 sudo python3 install.py --apply --component cockpit
+sudo python3 install.py --apply --component cockpit_ghsync
+sudo python3 install.py --apply --component cockpit_bookmarks
 sudo python3 install.py --apply --component filebrowser
 sudo python3 install.py --apply --component codeserver
 sudo python3 install.py --apply --component tailscale
 sudo python3 install.py --apply --component updates
 sudo python3 install.py --apply --component benchmarks
 ```
+
+GitHub Sync and Bookmarks become pages in Cockpit with no extra always-on listener. GitHub Sync needs per-user `gh auth login`, and Bookmarks terminal launchers stay unconfigured by this installer. See [Cockpit plugins](COCKPIT_PLUGINS.md).
 
 All management listeners are **configured to bind to 127.0.0.1**; independently confirm with `ss -lntp`. In particular, the FileBrowser Quantum module must be treated as **potentially able to modify models** until its permissions are corrected. Do not expose it externally.
 

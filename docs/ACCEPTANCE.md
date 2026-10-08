@@ -51,6 +51,10 @@ Fill in every field while performing real checks. Do not mark items green from P
 - [ ] FileBrowser Quantum stable starts and login works; negative test confirms it **cannot** modify models (**known BLOCKER SEC-01, fix required**).
 - [ ] code-server starts on localhost:8443; password authentication works.
 - [ ] Cockpit login works over HTTPS and authenticated SSH forwarding.
+- [ ] GitHub Sync Cockpit page renders; unprivileged user `gh auth login` is independent of root and `ghsync check` succeeds.
+- [ ] GitHub Sync installed hashes match its pinned commit and no cron or timer job is added implicitly.
+- [ ] Bookmarks Cockpit page renders, existing bookmark configuration survives rerun, and no launcher is started implicitly.
+- [ ] Any manually enabled Bookmarks terminal launcher undergoes bind/auth/write-mode and timeout inspection.
 - [ ] Tailscale daemon is active; manual `tailscale up` succeeds; no public serve/funnel route created.
 - [ ] Debian unattended security update timers exist; automated reboot remains disabled.
 

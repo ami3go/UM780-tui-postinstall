@@ -28,6 +28,7 @@ Do not run the real `--apply` command in developer CI or on a workstation whose 
 | `llmsetup/storage.py` | Read-only discovery and consented `fstab` + mount |
 | `llmsetup/component_base.py` | Installer registry names, dependencies, base/Vulkan/llama |
 | `llmsetup/component_llms.py` | Ollama, uv/Open WebUI, Qwen model |
+| `llmsetup/component_cockpit_plugins.py` | Pinned GitHub Sync system files and verified Bookmarks Debian release |
 | `llmsetup/component_addons.py` | Cockpit, Quantum, code-server, Tailscale, updates, diagnostics |
 | `llmsetup/components.py` | Import/export callable registry |
 | `llmsetup/health.py` | Non-destructive probes and report |
@@ -43,6 +44,10 @@ Do not run the real `--apply` command in developer CI or on a workstation whose 
 5. Use a conservative network bind address, an isolated service user, readable-but-restricted env files, and a systemd sandbox appropriate to the needs of the process.
 6. Test cold install, already-installed state, interrupted download/config write, failed systemd startup, corrupt upstream asset, symlink/hardlink escape and dependency absence.
 7. Update [Configuration](CONFIGURATION.md), [Operations](OPERATIONS.md), [Security](SECURITY.md) and [Acceptance](ACCEPTANCE.md) as applicable. Remove [Known issues](KNOWN_ISSUES.md) entries only with code and evidence.
+
+## Optional Cockpit extension rules
+
+Plugin install code must preserve existing local Cockpit apps; verify upstream source/package identity, stage writes when possible, record installed files, and refuse to overwrite unmanaged paths. Keep GitHub CLI authorization, scheduled sync, and Bookmarks terminal launchers manual. See [Cockpit plugins](COCKPIT_PLUGINS.md) and `tests/test_cockpit_plugins.py`.
 
 ## Critical contract: storage changes
 
