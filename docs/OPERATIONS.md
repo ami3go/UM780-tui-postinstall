@@ -73,9 +73,13 @@ After enrollment, substitute the machine's tailnet IP/hostname in the `ssh` comm
 
 By default, an apply run adds missing app cards to an installed Cockpit Bookmarks plugin. On-demand ttyd application cards are created only when their binaries are installed and require SSH-forwarded browser access; app web links are to the browser's `127.0.0.1` (not the server LAN IP). The operation preserves existing entries and writes a backup when it changes the JSON. Run `sudo python3 install.py --apply --component bookmark_sync` to rescan, or set `auto_bookmarks` to `false` to disable the post-hook. See [Bookmarks auto-configuration](BOOKMARKS_AUTO.md) for port forwarding, recovery and limitations.
 
+## Turnkey noVNC desktop
+
+Selecting the `novnc` module generates an eight-character random VncAuth password (root-only path `/etc/llm-postinstall/novnc-vnc-password`), sets up the dedicated `llmvnc` user and enables two localhost-only services: `llm-novnc-vnc.service` (VNC display `:2`, TCP 5902) and `llm-novnc.service` (browser TCP 6080). When Cockpit Bookmarks is installed, its noVNC Desktop card is added during automatic post-install synchronization. To log in, forward 6080 over SSH and use `sudo cat /etc/llm-postinstall/novnc-vnc-password` locally. NoVNC authentication needs the password only; do not publish the secret in Bookmarks. [Turnkey noVNC instructions](NOVNC_DESKTOP.md).
+
 ## Optional terminal, notebook and desktop tools
 
-The `fish`, `btop` and `mc` packages are CLI-only. The optional `ttyd`, `agent_of_empires`, `jupyterlab`, `vnc` and `novnc` components are documented in [Optional Tools](OPTIONAL_TOOLS.md), including activation, manual password creation, disabled-by-default services, SSH port forwarding and rollback commands. VNC/noVNC should not be exposed beyond localhost; a Jupyter notebook is a remote code execution interface gated by its token and SSH.
+The `fish`, `btop` and `mc` packages are CLI-only. The optional `ttyd`, `agent_of_empires`, `jupyterlab`, `vnc` and `novnc` components are documented in [Optional Tools](OPTIONAL_TOOLS.md). Ttyd and the user-specific VNC template require manual enablement; **novnc now autoconfigures a separate dedicated desktop**, with root-only generated credentials and no public listeners. VNC/noVNC should not be exposed beyond localhost; a Jupyter notebook is a remote code execution interface gated by its token and SSH.
 
 ## Cockpit GitHub Sync and Bookmarks
 
