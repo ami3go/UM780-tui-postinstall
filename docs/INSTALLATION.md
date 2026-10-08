@@ -174,3 +174,8 @@ Without `--apply`, `--plan` or `--health`, the tool opens the interactive checkl
 ## Problems?
 
 Start with [Known issues](KNOWN_ISSUES.md), then [Operations](OPERATIONS.md). Look for the first failure in `/var/log/llm-postinstall/` and `/var/lib/llm-postinstall/last-run.json`. An installer success status is not a substitute for on-device evidence.
+
+
+## Priority-based installation
+
+New installers should use the five-step plan: foundation/data safety, AI runtime, administration/development, remote access, then monitoring/recovery. The TUI displays one selection page per category. For controlled steps run `python3 install.py --list-stages`, then `python3 install.py --plan --stage 1` and `sudo python3 install.py --apply --stage 1` before proceeding to stage 2. Each `--stage` command selects only already-enabled defaults; unchecked modules require the TUI or `--component`. The exact order, manual setup and acceptance gates are in [Installation stages](INSTALL_STAGES.md).
