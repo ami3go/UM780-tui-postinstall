@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import glob
+import http.client
 import json
 from pathlib import Path
 import shutil
 import subprocess
-import urllib.request
 
 from .core import CONF_DIR, ROOT_DIR
 from .install_stages import ORDER
@@ -193,13 +193,17 @@ class LocalProbe:
         return self.command(['systemctl', 'is-active', '--quiet', name])[0]
 
     def model_names(self):
-        """Read-only local Ollama tags endpoint; never contact an external host."""
-        request = urllib.request.Request('http://127.0.0.1:11434/api/tags')
+        """Read local Ollama tags with a direct loopback socket, bypassing proxies."""
+        conn = http.client.HTTPConnection('127.0.0.1', 11434, timeout=1.2)
         try:
-            with urllib.request.urlopen(request, timeout=1.2) as response:
-                if response.status != 200 or response.headers.get('Content-Length', '0').isdigit() and int(response.headers.get('Content-Length', '0')) > 262144:
-                    return None
-                raw = response.read(262145)
+            conn.request('GET', '/api/tags')
+            response = conn.getresponse()
+            if response.status != 200:
+                return None
+            length = response.getheader('Content-Length')
+            if length is not None and (not length.isdigit() or int(length) > 262144):
+                return None
+            raw = response.read(262145)
             if len(raw) > 262144:
                 return None
             data = json.loads(raw)
@@ -208,8 +212,10 @@ class LocalProbe:
                 return None
             return {m.get('name') for m in models if isinstance(m, dict)
                     and isinstance(m.get('name'), str)}
-        except (OSError, ValueError, TypeError):
+        except (OSError, ValueError, TypeError, http.client.HTTPException):
             return None
+        finally:
+            conn.close()
 
 
 def has_evidence(probe, token):
