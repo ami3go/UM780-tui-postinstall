@@ -8,6 +8,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 
 | Guide | Purpose |
 | --- | --- |
+| [Optional safety and status](docs/OPTIONAL_SAFETY.md) | Preflight, private config snapshots/manual restore, Cockpit service overview |
 | [Optional native applications](docs/OPTIONAL_NATIVE_APPS.md) | OpenCode, llama-swap, Uptime Kuma, ingress readiness and UPS/WOL |
 | [Optional maintenance tools](docs/OPTIONAL_MAINTENANCE.md) | NVMe health, Restic, watchdog, zram, developer tools and model benchmarks |
 | [Installation](docs/INSTALLATION.md) | Prerequisites, staged install, selecting existing second NVMe, first login |
@@ -84,6 +85,9 @@ sudo python3 install.py --health
 | `uptime_kuma` | Native, localhost-only Uptime Kuma on port 3001; first-login setup |
 | `secure_ingress` | Tailscale identity readiness check; explicitly configure Serve yourself |
 | `ups_wol` | Prepare source of Cockpit UPS/WOL appliance for manual dry-run setup |
+| `preflight` | Optional early-stage free space/storage-root and private Cockpit checks |
+| `config_snapshot` | Root-only SHA-verified configuration snapshot with explicit restore CLI |
+| `cockpit_status` | Read-only service status page under Cockpit Tools |
 
 The default `config.json` selects the original core components plus Fish, btop and Midnight Commander. The five additional components (ttyd, Agent of Empires, JupyterLab, VNC and noVNC) start **unchecked**. The selected core components still include the optional Qwen model download module. Dependencies are not installed implicitly by per-component reruns. Only the `models` module prompts before pulling a model; `--yes` accepts that prompt as well as the initial apply prompt, so review the plan first.
 
