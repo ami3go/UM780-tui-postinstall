@@ -42,7 +42,7 @@ class UI:
     def checklist(self, selected):
         if shutil.which('whiptail') and sys.stdin.isatty():
             args = ['whiptail', '--title', 'Debian 13 LLM Server Setup',
-                    '--checklist', 'Choose modules (SPACE toggles)', '24', '100', '14']
+                    '--checklist', 'Choose modules (SPACE toggles)', '23', '100', '13']
             for component in ALL:
                 args += [component, DESCRIPTIONS[component], 'ON' if component in selected else 'OFF']
             p = subprocess.run(args, stderr=subprocess.PIPE, text=True)
