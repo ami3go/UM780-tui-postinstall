@@ -48,9 +48,11 @@ def _collect_snapshot_paths():
     for parent in (CONF_DIR, Path('/etc/systemd/system')):
         if parent.is_dir() and not parent.is_symlink():
             for f in sorted(parent.iterdir()):
+                if not _allowed_snapshot_path(str(f)):
+                    continue  # Debian systemd contains many unrelated unit-alias symlinks.
                 if f.is_symlink():
-                    raise SetupError('Refusing configuration symlink: ' + str(f))
-                if _allowed_snapshot_path(str(f)) and f.is_file():
+                    raise SetupError('Refusing installer-owned configuration symlink: ' + str(f))
+                if f.is_file():
                     paths.append(f)
     bookmarks = Path('/etc/cockpit/cockpit-bookmarks.json')
     if bookmarks.is_symlink():
