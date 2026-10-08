@@ -119,7 +119,7 @@ class ComponentState:
         if self.installed is None:
             return 'UNVERIFIED'
         if not self.installed:
-            return 'NOT INSTALLED'
+            return 'CONFIGURED ONLY' if self.configured is True else 'NOT INSTALLED'
         if self.configured is None:
             return 'INSTALLED / SETUP UNVERIFIED'
         return 'INSTALLED + CONFIGURED' if self.configured else 'INSTALLED ONLY'
@@ -129,7 +129,8 @@ class ComponentState:
         return {
             'ACTION DONE': 'DONE', 'ACTION PENDING': 'PENDING',
             'ACTION UNKNOWN': 'UNKNOWN', 'UNVERIFIED': 'UNKNOWN',
-            'NOT INSTALLED': 'MISSING', 'INSTALLED ONLY': 'INSTALLED',
+            'NOT INSTALLED': 'MISSING', 'CONFIGURED ONLY': 'CONFIG ONLY',
+            'INSTALLED ONLY': 'INSTALLED',
             'INSTALLED / SETUP UNVERIFIED': 'UNVERIFIED',
             'INSTALLED + CONFIGURED': 'CONFIGURED',
         }[self.status]
