@@ -89,7 +89,11 @@ Fill in every field while performing real checks. Do not mark items green from P
 - [ ] AoE executable is pinned/verified, runs as a normal user, creates no root agent process or public dashboard.
 - [ ] JupyterLab is token-authenticated, executes under `llmjupyter`, and listens only on `127.0.0.1:8888`.
 - [ ] TigerVNC service cannot start as root or without a VNC password; a normal user receives a working virtual XFCE session on loopback `5901`.
-- [ ] noVNC stays disabled until explicitly enabled; WebSocket port `6080` is localhost-only and cannot bypass VNC authentication.
+- [ ] Selecting `novnc` installs TigerVNC/XFCE/noVNC and configures `llmvnc` (not root), randomly generates and **reuses** an exactly eight-character VncAuth password, and enables both local services (5902, 6080).
+- [ ] Root secret file `/etc/llm-postinstall/novnc-vnc-password` has 0600 permissions; password file in `llmvnc` home is 0600, with correct ownership; neither password appears in logs, bookmark URLs or systemd unit files.
+- [ ] noVNC bookmark is auto-generated and describes how an administrator retrieves the VNC password; no password is embedded in Cockpit Bookmarks JSON.
+- [ ] The VNC :2 desktop and browser proxy survive two reboots, work with VNC password authentication, and reject an incorrect password.
+- [ ] WebSocket 6080 and VNC 5902 ports listen only on 127.0.0.1 and cannot bypass VNC authentication; SSH-forwarded browser access works.
 - [ ] Untrusted LAN client cannot connect directly to ttyd, notebook, VNC or noVNC; SSH forwarded access works.
 - [ ] Re-run the modules without starting disabled services or overwriting external executables/configuration.
 
