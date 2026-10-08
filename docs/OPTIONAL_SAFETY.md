@@ -18,7 +18,9 @@ sudo python3 install.py --apply --component config_snapshot
 sudo ls -l /var/backups/llm-postinstall/snapshots
 ```
 
-The optional module creates a unique mode-0600 `.tar.gz` containing **only** the installer config files, the Cockpit Bookmarks configuration (if present), and installer-prefixed `/etc/systemd/system/llm-*.service` / `*.timer` units. Each regular file gets a SHA-256 digest and file mode in an embedded manifest. Symlinks and unsupported locations are rejected. A file is limited to 5 MiB, total uncompressed config to 16 MiB. The snapshots **contain secrets** such as VNC passwords and must remain root-only. Exclude from unencrypted shared logs or web exports.
+On a completely clean system with no installer-managed configuration, it reports that there is nothing to preserve and exits successfully without creating an empty archive.
+
+Otherwise, the optional module creates a unique mode-0600 `.tar.gz` containing **only** the installer config files, the Cockpit Bookmarks configuration (if present), and installer-prefixed `/etc/systemd/system/llm-*.service` / `*.timer` units. Each regular file gets a SHA-256 digest and file mode in an embedded manifest. Symlinks and unsupported locations are rejected. A file is limited to 5 MiB, total uncompressed config to 16 MiB. The snapshots **contain secrets** such as VNC passwords and must remain root-only. Exclude from unencrypted shared logs or web exports.
 
 To restore a verified snapshot, from the local console or an interactive SSH session:
 
