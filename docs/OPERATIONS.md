@@ -69,6 +69,10 @@ tailscale ip -4
 
 After enrollment, substitute the machine's tailnet IP/hostname in the `ssh` command. The installer does not configure Tailscale Serve or Funnel; **do not enable Funnel for the Ollama API**. Do not use unauthenticated endpoints over raw LAN/WAN.
 
+## Optional terminal, notebook and desktop tools
+
+The `fish`, `btop` and `mc` packages are CLI-only. The optional `ttyd`, `agent_of_empires`, `jupyterlab`, `vnc` and `novnc` components are documented in [Optional Tools](OPTIONAL_TOOLS.md), including activation, manual password creation, disabled-by-default services, SSH port forwarding and rollback commands. VNC/noVNC should not be exposed beyond localhost; a Jupyter notebook is a remote code execution interface gated by its token and SSH.
+
 ## Cockpit GitHub Sync and Bookmarks
 
 The optional `cockpit_ghsync` and `cockpit_bookmarks` modules add Cockpit pages, not extra always-on web listeners. Authenticate with `gh auth login` **as the Cockpit login user**, then use `ghsync check` before cloning repositories. Bookmarks application/terminal launchers are powerful remote execution features; their startup is opt-in, and their bindings must be checked individually. See [Cockpit plugins](COCKPIT_PLUGINS.md) for commands and configuration paths.
