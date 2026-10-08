@@ -70,6 +70,13 @@ Fill in every field while performing real checks. Do not mark items green from P
 - [ ] Upstream binary versions/digests, Tailscale signing key fingerprint and Python wheel versions are recorded.
 - [ ] Signed Debian updates and repo trust paths work as configured.
 
+## Additional optional system safety capabilities
+
+- [ ] Selecting `preflight` first causes conservative failure before later package changes when the model path, free space or private Cockpit socket is unsafe.
+- [ ] Selecting `config_snapshot` preserves root-owned configuration secrets and verifies SHA-256 integrity, allowlisted paths and proper file modes.
+- [ ] `--restore-config` refuses non-interactive/untested input, and a manual restore creates a before-state snapshot; it does **not** claim package rollback.
+- [ ] Cockpit UM780 Status is accessible from the existing authenticated Cockpit session and uses unprivileged fixed commands without leaking secrets.
+
 ## Automatic application bookmarks
 
 - [ ] After the Bookmarks plugin installs, default apply runs add only actually installed service links; no external addresses are exposed.
