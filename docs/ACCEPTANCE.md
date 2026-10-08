@@ -140,3 +140,13 @@ Fill in every field while performing real checks. Do not mark items green from P
 **GO only when** all BLOCKER and HIGH safety items are closed, all acceptance assertions above have reproducible positive or correctly rejected-negative evidence, and no unreviewed external listener or storage hazard remains. If any item remains untested, state **NOT VERIFIED**, not PASS.
 
 Keep sanitized terminal output, hashes, logs, CI URLs, version inventory and storage layout in a protected evidence directory. Never attach unredacted passwords, Tailscale keys, tokens or device identifiers to public PRs.
+
+
+## Staged installer workflow acceptance
+
+- [ ] `--list-stages` lists all 39 modules exactly once in five priorities, with the 18 default selections unchanged.
+- [ ] `--plan --stage 1` through `--plan --stage 5` show only the corresponding default-enabled modules, never activate unchecked software.
+- [ ] Multiple `--stage` flags deduplicate software and preserve canonical dependency order regardless of argument ordering.
+- [ ] Whiptail and numbered fallback visit all five categories; cancel aborts all changes and manually toggled optional modules remain selected only by explicit consent.
+- [ ] A full run and isolated stage runs preserve storage UUID approval, model pull confirmation, listener security and previous per-module error/health semantics.
+- [ ] Existing application data and the original `config.json` default components remain unchanged.
