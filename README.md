@@ -12,6 +12,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
 | [Architecture](docs/ARCHITECTURE.md) | Modules, state, systemd and data flows, design constraints |
 | [Operations](docs/OPERATIONS.md) | Start/stop, SSH/Tailscale forwarding, updates, backups, diagnostics |
+| [Cockpit extensions](docs/COCKPIT_PLUGINS.md) | GitHub Sync and Bookmarks setup, access, security, and updates |
 | [Security and storage](docs/SECURITY.md) | Threat model, disk safeguards, permissions, network exposure and trust |
 | [Known issues](docs/KNOWN_ISSUES.md) | Implementation gaps and unverified integration assumptions |
 | [Development and testing](docs/DEVELOPMENT.md) | Test suite, CI scope, contribution and documentation rules |
@@ -50,6 +51,8 @@ sudo python3 install.py --health
 | `webui` | Python 3.11/uv Open WebUI, `127.0.0.1:3000` |
 | `models` | Optional `qwen2.5-coder:7b` pull into Ollama |
 | `cockpit` | Cockpit HTTPS `127.0.0.1:9090` |
+| `cockpit_ghsync` | [Your GitHub Sync](https://github.com/ami3go/ghsync) Cockpit plugin; per-user GitHub authentication |
+| `cockpit_bookmarks` | [Your Bookmarks](https://github.com/ami3go/bookmarks) Cockpit plugin; prebuilt `.deb`, launchers opt-in |
 | `filebrowser` | FileBrowser Quantum v1.5.6-stable, `127.0.0.1:8082` |
 | `codeserver` | code-server HTTP `127.0.0.1:8443` |
 | `tailscale` | Tailscale software and daemon, **manual enrollment required** |
