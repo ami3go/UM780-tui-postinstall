@@ -8,7 +8,7 @@ This file describes the **current code behavior**, not proposed settings. The si
 | --- | --- | --- | --- |
 | `target_os` | `"debian-13"` | Yes | Must match exactly, not a general-purpose distro selector |
 | `host` | `"bare-metal"` | Yes | VMs and containers rejected by preflight |
-| `components` | All 13 modules | Yes | TUI initially checks each item; see component order below |
+| `components` | All 15 modules | Yes | TUI initially checks each item; see component order below |
 | `model` | `"qwen2.5-coder:7b"` | Yes | For `models`, only prefixes `qwen2.5-coder:` and `qwen3-coder:` pass the current basic check |
 | `webui_bind` | `"127.0.0.1"` | **No** | Informational only; listener address is hardcoded in the service |
 | `llama_model_path` | `""` | Yes | Optional existing GGUF path under selected `models/gguf/`; also set by `--gguf` |
@@ -31,11 +31,13 @@ The modules are evaluated in the following fixed order, even with several `--com
 | 6 | `webui` | Python 3.11 downloaded via uv; Ollama expected for useful UI |
 | 7 | `models` | Ollama installed and running; prompts for multi-GB Qwen pull |
 | 8 | `cockpit` | APT reachable, SSH forwarding for access |
-| 9 | `filebrowser` | Supported existing model storage and Quantum GitHub release asset |
-| 10 | `codeserver` | Upstream code-server release and Debian package dependencies |
-| 11 | `tailscale` | Official Tailscale Debian repository; manual `sudo tailscale up` |
-| 12 | `updates` | Debian APT security sources |
-| 13 | `benchmarks` | Sysbench / Vulkan command-line tools |
+| 9 | `cockpit_ghsync` | Cockpit module installed, signed-in user sets up `gh auth login`; no scheduler auto-enabled |
+| 10 | `cockpit_bookmarks` | Cockpit module installed; checksum-verified Bookmarks `.deb` and optional launcher security review |
+| 11 | `filebrowser` | Supported existing model storage and Quantum GitHub release asset |
+| 12 | `codeserver` | Upstream code-server release and Debian package dependencies |
+| 13 | `tailscale` | Official Tailscale Debian repository; manual `sudo tailscale up` |
+| 14 | `updates` | Debian APT security sources |
+| 15 | `benchmarks` | Sysbench / Vulkan command-line tools |
 
 **No dependency resolver exists.** `--apply --component models` does not automatically install Ollama, for example. If you select multiple modules, only those modules are run; ordering follows the list above.
 
@@ -63,6 +65,8 @@ sudo python3 install.py --apply --component models  # opt-in download prompt
 sudo python3 install.py --health
 ```
 
+For the Cockpit extensions, see [Cockpit plugins](COCKPIT_PLUGINS.md). Neither module logs into GitHub, starts sync jobs, or enables terminal launchers automatically.
+
 ## Service endpoints and credentials
 
 | Service | Bind | Scheme | Credential |
@@ -73,6 +77,8 @@ sudo python3 install.py --health
 | FileBrowser Quantum | `127.0.0.1:8082` | HTTP | `admin`, generated password |
 | code-server | `127.0.0.1:8443` | HTTP | Generated password |
 | Cockpit | `127.0.0.1:9090` | HTTPS | Existing Linux account / PAM |
+| GitHub Sync | Cockpit page (no extra TCP port) | Cockpit | Uses logged-in Linux user's `gh` authentication |
+| Bookmarks | Cockpit page (no extra TCP port until optional launchers) | Cockpit | Admin required to edit config; launcher settings must be reviewed |
 | Tailscale | No web UI from installer | N/A | Must enroll manually |
 
 All locations are host-side; SSH forward to view from another machine. The listener bindings are intended and **must be verified** with `ss -lntp` after installation. FileBrowser's current configured model source is **not reliably read-only**.
@@ -81,6 +87,9 @@ All locations are host-side; SSH forward to view from another machine. The liste
 
 | Path | Purpose |
 | --- | --- |
+| `/opt/llm-stack/cockpit-ghsync-src/` | Pinned GitHub Sync source revision |
+| `/etc/llm-postinstall/cockpit-ghsync.json` | Root-only installed plugin manifest / SHA256 hashes |
+| `/etc/cockpit/cockpit-bookmarks.json` | Persistent Bookmarks user configuration |
 | `/opt/llm-stack/llama.cpp/` | Source/build |
 | `/opt/llm-stack/ollama/` | Versioned Ollama binary distribution |
 | `/opt/llm-stack/open-webui/venv/` | Open WebUI virtual environment |
