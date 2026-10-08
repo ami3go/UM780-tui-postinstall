@@ -29,6 +29,7 @@ Do not run the real `--apply` command in developer CI or on a workstation whose 
 | `llmsetup/component_base.py` | Installer registry names, dependencies, base/Vulkan/llama |
 | `llmsetup/component_llms.py` | Ollama, uv/Open WebUI, Qwen model |
 | `llmsetup/component_bookmarks_auto.py` | Installed-app discovery, additive Cockpit Bookmarks config merge, atomic writes and backups |
+| `llmsetup/component_novnc_setup.py` | Dedicated noVNC account, 8-character VncAuth credential, VNC/backend and localhost proxy units |
 | `llmsetup/component_optional_tools.py` | Optional Debian utilities, verified binaries and local-only Jupyter/VNC/ttyd units |
 | `llmsetup/component_cockpit_plugins.py` | Pinned GitHub Sync system files and verified Bookmarks Debian release |
 | `llmsetup/component_addons.py` | Cockpit, Quantum, code-server, Tailscale, updates, diagnostics |
