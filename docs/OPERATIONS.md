@@ -69,6 +69,10 @@ tailscale ip -4
 
 After enrollment, substitute the machine's tailnet IP/hostname in the `ssh` command. The installer does not configure Tailscale Serve or Funnel; **do not enable Funnel for the Ollama API**. Do not use unauthenticated endpoints over raw LAN/WAN.
 
+## Cockpit GitHub Sync and Bookmarks
+
+The optional `cockpit_ghsync` and `cockpit_bookmarks` modules add Cockpit pages, not extra always-on web listeners. Authenticate with `gh auth login` **as the Cockpit login user**, then use `ghsync check` before cloning repositories. Bookmarks application/terminal launchers are powerful remote execution features; their startup is opt-in, and their bindings must be checked individually. See [Cockpit plugins](COCKPIT_PLUGINS.md) for commands and configuration paths.
+
 ## 3. Authentication and credentials
 
 Initial generated secrets are stored under `/etc/llm-postinstall/` (root-only). View individually:
