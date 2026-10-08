@@ -50,7 +50,9 @@ The modules are evaluated in the following fixed order, even with several `--com
 | 23 | `novnc` | Turnkey TigerVNC/XFCE :2 with generated VncAuth password, active localhost web proxy and Cockpit bookmark |
 | 24 | `bookmark_sync` | Explicit idempotent Cockpit Bookmarks application rescan; auto-hook is on even when unchecked |
 
-Seven additional unchecked modules: `hardware_health`, `backup_restore`, `cockpit_storage`, `service_watchdog`, `developer_tools`, `llm_benchmark`, and `zram`. See [Optional maintenance](OPTIONAL_MAINTENANCE.md) for installation and behavior.
+Seven additional unchecked maintenance modules: `hardware_health`, `backup_restore`, `cockpit_storage`, `service_watchdog`, `developer_tools`, `llm_benchmark`, and `zram`. See [Optional maintenance](OPTIONAL_MAINTENANCE.md) for installation and behavior.
+
+Five additional unchecked native/integration modules: `opencode`, `llama_swap`, `uptime_kuma`, `secure_ingress`, `ups_wol`. See [Optional native apps](OPTIONAL_NATIVE_APPS.md).
 
 **No dependency resolver exists.** `--apply --component models` does not automatically install Ollama, for example. If you select multiple modules, only those modules are run; ordering follows the list above.
 

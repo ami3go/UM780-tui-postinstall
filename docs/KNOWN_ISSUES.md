@@ -28,6 +28,13 @@ Reviewed against `main` source on **2026-10-08**. This is a transparent engineer
 | CI-01 | **MEDIUM** | Test coverage | CI compiles Python, runs mocked unittests and a plan command on Ubuntu, not Debian systemd on UM780 Pro. | Debian test VM/container where practical; supervised real-machine CI gate for hardware functions |
 | PERF-01 | **LOW** | Benchmark terminology | `benchmarks` writes CPU/sysbench and Vulkan summaries, not tokens/sec benchmarks. | Separate model benchmark command/evidence and performance thresholds |
 
+## Optional native integration limitations
+
+- `uptime_kuma`: pinned v2.5.0 instead of broken upstream native 2.5.1; Node/npm installation and first-login authentication are unverified on Debian 13 target. Node modules may execute upstream install scripts.
+- `opencode` and `llama_swap`: verified upstream release binaries but runtime CLI, model routing config, permissions and hardware behavior unverified.
+- `secure_ingress`: Tailscale identity readiness only; full authenticated TLS ingress remains manual and no port is opened by this module.
+- `ups_wol`: preparation-only source clone; UPS/hardware installation remains separate, unarmed and unvalidated. Source branch is not pinned for execution.
+
 ## Optional maintenance limitations
 
 - New optional `hardware_health` only produces a one-time report; no recurring SMART wear thresholds or physical alerts.
