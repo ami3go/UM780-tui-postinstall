@@ -14,7 +14,7 @@ from .storage import configure_storage
 
 ALL = ['base', 'storage', 'vulkan', 'llama', 'ollama', 'webui', 'models',
        'cockpit', 'cockpit_ghsync', 'cockpit_bookmarks', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks',
-       'fish', 'btop', 'mc', 'ttyd', 'agent_of_empires', 'jupyterlab', 'vnc', 'novnc']
+       'fish', 'btop', 'mc', 'ttyd', 'agent_of_empires', 'jupyterlab', 'vnc', 'novnc', 'bookmark_sync']
 DESCRIPTIONS = {
  'base': 'System utilities, SSH and prerequisite packages',
  'storage': 'Optional existing second-SSD mount (typed UUID approval)',
@@ -38,7 +38,8 @@ DESCRIPTIONS = {
  'agent_of_empires': 'Agent of Empires tmux coding-agent manager (no daemon)',
  'jupyterlab': 'Local-only token-authenticated JupyterLab workspace',
  'vnc': 'Virtual XFCE desktop via TigerVNC (manual activation)',
- 'novnc': 'Browser VNC proxy (manual activation after VNC)'
+ 'novnc': 'Browser VNC proxy (manual activation after VNC)',
+ 'bookmark_sync': 'Refresh Cockpit Bookmarks from installed applications'
 }
 
 
