@@ -176,9 +176,9 @@ class StatusTests(unittest.TestCase):
         p.units.add('llm-ollama.service')
         p.contents['/etc/systemd/system/llm-ollama.service']='# Managed by debian-llm-postinstall'
         env='/etc/llm-postinstall/ollama.env'
-        p.contents[env]='# OLLAMA_HOST=127.0.0.1:11434\\nOLLAMA_HOST=0.0.0.0:11434'
+        p.contents[env]='# OLLAMA_HOST=127.0.0.1:11434\nOLLAMA_HOST=0.0.0.0:11434'
         self.assertEqual(inventory.inspect('ollama',{},p).status,'INSTALLED ONLY')
-        p.contents[env]='OLLAMA_HOST=127.0.0.1:11434\\nOLLAMA_HOST=0.0.0.0:11434'
+        p.contents[env]='OLLAMA_HOST=127.0.0.1:11434\nOLLAMA_HOST=0.0.0.0:11434'
         self.assertEqual(inventory.inspect('ollama',{},p).status,'INSTALLED ONLY')
 
     def test_llama_model_must_exist_inside_managed_gguf_dir(self):
