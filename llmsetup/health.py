@@ -8,13 +8,14 @@ import subprocess
 import urllib.request
 from .core import detect_target
 
-MANAGEMENT_PORTS = (11434, 8081, 3000, 8082, 8443, 9090)
+MANAGEMENT_PORTS = (11434, 8081, 3000, 8082, 8443, 9090, 7681, 8888, 5901, 6080)
 
 SERVICE_MAP = {
  'llama': 'llm-llama.service', 'ollama': 'llm-ollama.service',
  'webui': 'llm-webui.service', 'cockpit': 'cockpit.socket',
  'filebrowser': 'llm-filebrowser.service', 'codeserver': 'llm-codeserver.service',
- 'tailscale': 'tailscaled.service', 'updates': 'apt-daily-upgrade.timer'
+ 'tailscale': 'tailscaled.service', 'updates': 'apt-daily-upgrade.timer',
+ 'jupyterlab': 'llm-jupyterlab.service'
 }
 
 
@@ -100,6 +101,25 @@ def diagnostics(components=None):
         ok = pkg.is_file() and not pkg.is_symlink()
         result.append(('PASS' if ok else 'WARN', 'cockpit-bookmarks',
                        'Cockpit page installed; config, login and launchers are not tested'))
+    for component, cmd in [('fish', 'fish'), ('btop', 'btop'), ('mc', 'mc')]:
+        if component in components:
+            ok = shutil.which(cmd) is not None
+            result.append(('PASS' if ok else 'WARN', component, 'binary on PATH' if ok else 'binary not found'))
+    for component, binary in [('ttyd', '/opt/llm-stack/bin/ttyd'),
+                              ('agent_of_empires', '/opt/llm-stack/bin/aoe')]:
+        if component in components:
+            installed = Path(binary).is_file()
+            result.append(('PASS' if installed else 'WARN', component, 'binary installed; function not exercised'))
+    for component, unit_name, port in [('ttyd', 'llm-ttyd.service', 7681),
+                                        ('vnc', 'llm-vnc@.service', 5901),
+                                        ('novnc', 'llm-novnc.service', 6080)]:
+        if component in components:
+            exists = Path('/etc/systemd/system', unit_name).is_file()
+            result.append(('PENDING' if exists else 'WARN', component+'-activation',
+                           'manual per-user setup required; check service instance/listener yourself'))
+    if 'jupyterlab' in components:
+        result.append(('PASS' if check_port('127.0.0.1', 8888) else 'WARN', 'jupyter-port',
+                       '127.0.0.1:8888 (TCP only, token auth not tested)'))
     if 'tailscale' in components:
         ok, out = probe(['tailscale', 'status', '--json'])
         status = 'WARN'

@@ -37,6 +37,12 @@ The current `--health` wildcard-listener check does not reliably detect listener
 
 Both plugin modules require the Cockpit loopback socket override. File presence checks in `--health` do not prove login security. See [Cockpit plugins](COCKPIT_PLUGINS.md).
 
+## Optional local development / remote desktop surfaces
+
+`ttyd` provides a writable terminal as the dedicated non-root `llmterminal` account and is **disabled initially**; it has no separate HTTP password and must be reached over an SSH tunnel. `agent_of_empires` is CLI-only and does not launch agents, Docker containers or an AoE dashboard automatically. JupyterLab runs as `llmjupyter`, bound to loopback with default token authentication; notebooks execute code. TigerVNC and noVNC are provided as disabled local-only services: a regular user's VNC password must be configured before opt-in activation. noVNC does not add independent authentication to the VNC stream.
+
+Ports `7681`, `8888`, `5901`, and `6080` are included in the wildcard listener check, but this does not detect every non-loopback interface binding. See [Optional Tools](OPTIONAL_TOOLS.md) and [Known Issues](KNOWN_ISSUES.md).
+
 ## FileBrowser Quantum: outstanding write-permission risk
 
 The `filebrowser` module currently joins the `filebrowser` system account to `llmshare` and creates the model directory group-owned by `llmshare` with mode `2775`. That allows group write access. The generated FileBrowser Quantum config does **not** set per-source immutable/read-only filesystem restrictions or fully restrict default user permissions.

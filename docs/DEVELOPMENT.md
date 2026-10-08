@@ -28,6 +28,7 @@ Do not run the real `--apply` command in developer CI or on a workstation whose 
 | `llmsetup/storage.py` | Read-only discovery and consented `fstab` + mount |
 | `llmsetup/component_base.py` | Installer registry names, dependencies, base/Vulkan/llama |
 | `llmsetup/component_llms.py` | Ollama, uv/Open WebUI, Qwen model |
+| `llmsetup/component_optional_tools.py` | Optional Debian utilities, verified binaries and local-only Jupyter/VNC/ttyd units |
 | `llmsetup/component_cockpit_plugins.py` | Pinned GitHub Sync system files and verified Bookmarks Debian release |
 | `llmsetup/component_addons.py` | Cockpit, Quantum, code-server, Tailscale, updates, diagnostics |
 | `llmsetup/components.py` | Import/export callable registry |
@@ -48,6 +49,10 @@ Do not run the real `--apply` command in developer CI or on a workstation whose 
 ## Optional Cockpit extension rules
 
 Plugin install code must preserve existing local Cockpit apps; verify upstream source/package identity, stage writes when possible, record installed files, and refuse to overwrite unmanaged paths. Keep GitHub CLI authorization, scheduled sync, and Bookmarks terminal launchers manual. See [Cockpit plugins](COCKPIT_PLUGINS.md) and `tests/test_cockpit_plugins.py`.
+
+## Optional tool constraints
+
+Use Debian stable packages when available. When installing upstream release binaries, validate a unique release asset against a SHA256 checksum, do not use `curl | sh`, do not overwrite unmanaged executables, and keep version upgrades explicit. Only localhost ports are allowed for ttyd/Jupyter/VNC/noVNC, and terminal/desktop entry points must run as non-root users. Do not auto-enable a writable terminal or VNC/noVNC service without explicit operator action. Add coverage in `tests/test_optional_tools.py` and update [Optional Tools](OPTIONAL_TOOLS.md).
 
 ## Critical contract: storage changes
 
