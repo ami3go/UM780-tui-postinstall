@@ -30,6 +30,17 @@ class RegistryTests(unittest.TestCase):
 
 
 class DiscoveryTests(unittest.TestCase):
+    def test_novnc_bookmark_shows_secret_location_but_not_secret(self):
+        from llmsetup.component_bookmarks_auto import desired_entries
+        entries=desired_entries(exists=lambda p: p.endswith('llm-novnc.service'),
+                                command_exists=lambda _:False)
+        self.assertEqual([e['name'] for e in entries], ['noVNC Desktop'])
+        card=entries[0]
+        self.assertEqual(card['url'],'http://127.0.0.1:6080/vnc.html')
+        self.assertIn('/etc/llm-postinstall/novnc-vnc-password', card['description'])
+        self.assertNotIn('password=',card['url'])
+        self.assertEqual(card['group'],'UM780 Web Apps')
+
     def test_web_apps_only_when_installed(self):
         entries = desired_entries(
             exists=lambda path: path.endswith('llm-webui.service'), command_exists=lambda _: False)
