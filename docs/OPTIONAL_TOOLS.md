@@ -13,9 +13,9 @@ Target: Debian 13 minimal / UM780 Pro. All installers are individually selectabl
 | `agent_of_empires` | Verified upstream release `v1.17.2` | No | Installs `aoe` CLI; **no web server or agents started** |
 | `jupyterlab` | Debian `jupyterlab` and kernel packages | No | Native non-root localhost-only systemd service |
 | `vnc` | Debian TigerVNC + XFCE | No | Installs systemd user-instance template; **does not enable/start** |
-| `novnc` | Debian noVNC + websockify | No | Installs localhost-only proxy unit; **does not enable/start** |
+| `novnc` | Debian noVNC + websockify + TigerVNC/XFCE | No | **Configures and starts** dedicated localhost VNC :2 desktop + noVNC; generated VNC password |
 
-The headless default remains headless. Selecting `vnc` installs XFCE files and a virtual display service template, but no physical display manager or GUI login is enabled. The chosen JupyterLab module does run a localhost server.
+The headless default remains headless. Selecting `vnc` installs XFCE files and a virtual display service template, but no physical display manager or GUI login is enabled. **Selecting `novnc` now configures and automatically enables a separate XFCE virtual display :2 with generated root-only credentials and browser proxy.** The chosen JupyterLab module does run a localhost server.
 
 ## Install individually
 
@@ -93,7 +93,7 @@ Open `http://127.0.0.1:8888/lab` through the tunnel. Retrieve the login token fr
 
 The packaged JupyterLab may install sizable Node/JavaScript-related Debian dependencies. This is a runtime application choice, not replacement of GNU coreutils.
 
-## TigerVNC and noVNC — optional virtual XFCE desktop
+## TigerVNC (manual :1) and noVNC (automatic :2) desktops
 
 `vnc` provisions `llm-vnc@.service` and a standalone **virtual display** at `:1` (normally `127.0.0.1:5901`). The template is intentionally disabled, and rejects root as the desktop user. Only an **existing ordinary Linux account** may run a VNC desktop. It requires an actual VNC password created interactively by that account.
 
@@ -110,26 +110,29 @@ sudo systemctl status llm-vnc@YOUR_USER.service --no-pager
 sudo ss -lntp | grep ':5901'
 ```
 
-Only after VNC is authenticated and running, activate the browser proxy:
+The separate `novnc` component **no longer depends on manually starting the :1 user-specific VNC session**. Selecting `novnc` creates a dedicated `llmvnc` XFCE session on `:2` and enables the proxy; see [Turnkey noVNC](NOVNC_DESKTOP.md). The manual :1 TigerVNC template remains available if you prefer a personal desktop.
+
+For an integrated noVNC installation, inspect its services:
 
 ```sh
-sudo systemctl cat llm-novnc.service
-sudo systemctl enable --now llm-novnc.service
-sudo ss -lntp | grep ':6080'
+sudo systemctl cat llm-novnc-vnc.service llm-novnc.service
+sudo systemctl status llm-novnc-vnc.service llm-novnc.service --no-pager
+sudo ss -lntp | grep -E ':(5902|6080)'
 ```
 
 Both server listeners should be loopback-only. On your client:
 
 ```sh
-ssh -N -L 6080:127.0.0.1:6080 -L 5901:127.0.0.1:5901 USER@SERVER_IP
+ssh -N -L 6080:127.0.0.1:6080 USER@SERVER_IP
 ```
 
-Open `http://127.0.0.1:6080/vnc.html`; enter the VNC password when prompted. noVNC itself is **not a substitute for VNC authentication**. Its websocket proxy is local-only and there is no internet-facing HTTPS/reverse proxy configured.
+Open `http://127.0.0.1:6080/vnc.html`; enter the generated VNC password, available via `sudo cat /etc/llm-postinstall/novnc-vnc-password` on the host. noVNC itself is **not a substitute for VNC authentication**. Its websocket proxy is local-only and there is no internet-facing HTTPS/reverse proxy configured.
 
 Disable if not needed:
 
 ```sh
-sudo systemctl disable --now llm-novnc.service
+sudo systemctl disable --now llm-novnc.service llm-novnc-vnc.service
+# Manually configured :1 TigerVNC is separate:
 sudo systemctl disable --now llm-vnc@YOUR_USER.service
 ```
 
@@ -142,7 +145,7 @@ The VNC template is based on Debian 13's `tigervncserver` wrapper and `-xstartup
 | ttyd (after manual enable) | `127.0.0.1:7681` | SSH port forward |
 | JupyterLab (after installing module) | `127.0.0.1:8888` | SSH port forward + token |
 | TigerVNC (after user setup and manual enable) | `127.0.0.1:5901` | SSH/VNC tunnel + VNC password |
-| noVNC (after manual enable) | `127.0.0.1:6080` | SSH tunnel + VNC password |
+| noVNC (configured on module installation) | `127.0.0.1:6080` (+ backend 5902) | SSH tunnel + generated root-held VNC password |
 | Agent of Empires | **No listener** | Local per-user TUI; web dashboard not enabled |
 
 ## Acceptance and limitations
