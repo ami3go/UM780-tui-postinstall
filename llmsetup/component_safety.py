@@ -202,7 +202,7 @@ def preflight(r, cfg, ui):
     if root.is_symlink() or not root.is_absolute() or '..' in root.parts:
         errors.append('Untrusted model storage path')
         notes.append('FAIL: Untrusted model storage path')
-    if not str(root).startswith(('/srv/llm-data/models', '/var/lib/llm-stack/models')):
+    if str(root) not in ('/srv/llm-data/models', '/var/lib/llm-stack/models'):
         errors.append('Unknown model storage location')
         notes.append('FAIL: Unknown model storage location')
     for folder in ('/', '/var', '/opt'):
