@@ -31,6 +31,7 @@ The component registry in `llmsetup/components.py` imports functions from:
 
 - `component_base.py`: module list/description, base packages, storage, AMD Vulkan, llama.cpp.
 - `component_llms.py`: Ollama, uv/Python/Open WebUI, optional Qwen pull.
+- `component_optional_tools.py`: Fish/btop/MC APT packages; verified ttyd and AoE executables; non-root Jupyter; disabled VNC/noVNC systemd units.
 - `component_cockpit_plugins.py`: Pinned upstream GitHub Sync Cockpit plugin; digest-verified Bookmarks Debian plugin.
 - `component_addons.py`: Cockpit, FileBrowser Quantum, code-server, Tailscale, unattended security upgrades, benchmark prerequisites.
 - `storage.py`: existing-filesystem candidate discovery, fstab entry construction, mount.
@@ -64,6 +65,8 @@ SSH server on Debian 13
        +- ollama/
        \- gguf/
 ```
+
+Optional localhost endpoints use ports 7681 (ttyd), 8888 (JupyterLab), 5901 (TigerVNC) and 6080 (noVNC). The last three except JupyterLab require explicit activation, and AoE provides only the per-user TUI. See [Optional Tools](OPTIONAL_TOOLS.md).
 
 **Ollama and llama.cpp are separate processes and model layouts.** Open WebUI's configured backend is Ollama; the installer does **not** automatically register llama.cpp as an OpenAI-compatible backend in WebUI. It also does not set up a fronting proxy, LAN firewall, Tailscale Serve, DNS, external TLS certificate, high availability or GPU/CPU autoscheduling.
 
