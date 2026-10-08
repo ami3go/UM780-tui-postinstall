@@ -43,9 +43,9 @@ An enabled `auto_bookmarks` post-install hook appends local app links to `/etc/c
 
 ## Optional local development / remote desktop surfaces
 
-`ttyd` provides a writable terminal as the dedicated non-root `llmterminal` account and is **disabled initially**; it has no separate HTTP password and must be reached over an SSH tunnel. `agent_of_empires` is CLI-only and does not launch agents, Docker containers or an AoE dashboard automatically. JupyterLab runs as `llmjupyter`, bound to loopback with default token authentication; notebooks execute code. TigerVNC and noVNC are provided as disabled local-only services: a regular user's VNC password must be configured before opt-in activation. noVNC does not add independent authentication to the VNC stream.
+`ttyd` provides a writable terminal as the dedicated non-root `llmterminal` account and is **disabled initially**; it has no separate HTTP password and must be reached over an SSH tunnel. `agent_of_empires` is CLI-only and does not launch agents, Docker containers or an AoE dashboard automatically. JupyterLab runs as `llmjupyter`, bound to loopback with default token authentication; notebooks execute code. The optional user-specific TigerVNC `vnc` module provisions a disabled template requiring manual credentials. Separately, installing the **novnc** module auto-configures a restricted `llmvnc` account and generates a root-only eight-character VncAuth password. It enables the VNC :2 backend (127.0.0.1:5902) and noVNC proxy (127.0.0.1:6080) over localhost. The password is not embedded in its bookmark, logs, URLs or service arguments. Classic VncAuth has only eight significant characters, so **SSH forwarding and localhost-only binds are mandatory**; noVNC adds no independent authentication. See [Turnkey noVNC](NOVNC_DESKTOP.md).
 
-Ports `7681`, `8888`, `5901`, and `6080` are included in the wildcard listener check, but this does not detect every non-loopback interface binding. See [Optional Tools](OPTIONAL_TOOLS.md) and [Known Issues](KNOWN_ISSUES.md).
+Ports `7681`, `8888`, `5901`, `5902`, and `6080` are included in the wildcard listener check, but this does not detect every non-loopback interface binding. See [Optional Tools](OPTIONAL_TOOLS.md) and [Known Issues](KNOWN_ISSUES.md).
 
 ## FileBrowser Quantum: outstanding write-permission risk
 
