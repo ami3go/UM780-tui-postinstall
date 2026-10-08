@@ -8,7 +8,7 @@ This file describes the **current code behavior**, not proposed settings. The si
 | --- | --- | --- | --- |
 | `target_os` | `"debian-13"` | Yes | Must match exactly, not a general-purpose distro selector |
 | `host` | `"bare-metal"` | Yes | VMs and containers rejected by preflight |
-| `components` | All 15 modules | Yes | TUI initially checks each item; see component order below |
+| `components` | 18 selected; 5 additional optional | Yes | TUI initially checks each item; see component order below |
 | `model` | `"qwen2.5-coder:7b"` | Yes | For `models`, only prefixes `qwen2.5-coder:` and `qwen3-coder:` pass the current basic check |
 | `webui_bind` | `"127.0.0.1"` | **No** | Informational only; listener address is hardcoded in the service |
 | `llama_model_path` | `""` | Yes | Optional existing GGUF path under selected `models/gguf/`; also set by `--gguf` |
@@ -38,6 +38,14 @@ The modules are evaluated in the following fixed order, even with several `--com
 | 13 | `tailscale` | Official Tailscale Debian repository; manual `sudo tailscale up` |
 | 14 | `updates` | Debian APT security sources |
 | 15 | `benchmarks` | Sysbench / Vulkan command-line tools |
+| 16 | `fish` | Debian fish; does not change the login shell |
+| 17 | `btop` | Debian btop resource monitor |
+| 18 | `mc` | Debian mc file manager |
+| 19 | `ttyd` | Verified upstream static release; local-only disabled service |
+| 20 | `agent_of_empires` | Verified upstream CLI and tmux; no web daemon |
+| 21 | `jupyterlab` | Debian JupyterLab; localhost token-authenticated service |
+| 22 | `vnc` | TigerVNC/XFCE template; explicit user password and activation |
+| 23 | `novnc` | Websockify/noVNC proxy; requires running VNC backend, manual activation |
 
 **No dependency resolver exists.** `--apply --component models` does not automatically install Ollama, for example. If you select multiple modules, only those modules are run; ordering follows the list above.
 
@@ -65,6 +73,8 @@ sudo python3 install.py --apply --component models  # opt-in download prompt
 sudo python3 install.py --health
 ```
 
+For headless tools and optional browser/desktop services, see [Optional tools](OPTIONAL_TOOLS.md). These five remote-facing optional modules are not selected by default; enable only after reviewing their separate authentication boundaries.
+
 For the Cockpit extensions, see [Cockpit plugins](COCKPIT_PLUGINS.md). Neither module logs into GitHub, starts sync jobs, or enables terminal launchers automatically.
 
 ## Service endpoints and credentials
@@ -80,6 +90,10 @@ For the Cockpit extensions, see [Cockpit plugins](COCKPIT_PLUGINS.md). Neither m
 | GitHub Sync | Cockpit page (no extra TCP port) | Cockpit | Uses logged-in Linux user's `gh` authentication |
 | Bookmarks | Cockpit page (no extra TCP port until optional launchers) | Cockpit | Admin required to edit config; launcher settings must be reviewed |
 | Tailscale | No web UI from installer | N/A | Must enroll manually |
+| ttyd | `127.0.0.1:7681`, after explicit enable | HTTP/WebSocket | No app password; access via SSH tunnel, low-privilege service account |
+| JupyterLab | `127.0.0.1:8888` | HTTP | Per-instance token, SSH port forwarding |
+| TigerVNC | `127.0.0.1:5901`, after manual setup | VNC | VNC password; ordinary Linux account |
+| noVNC | `127.0.0.1:6080`, after manual enable | HTTP/WebSocket | VNC backend password; proxy has no separate login |
 
 All locations are host-side; SSH forward to view from another machine. The listener bindings are intended and **must be verified** with `ss -lntp` after installation. FileBrowser's current configured model source is **not reliably read-only**.
 
