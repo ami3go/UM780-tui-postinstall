@@ -132,15 +132,11 @@ class ToolInstallTests(unittest.TestCase):
             self.assertIn('xfce4', r.packages)
             self.assertFalse(r.commands)
 
-    def test_novnc_requires_manual_activation(self):
+    def test_novnc_delegates_to_turnkey_secure_setup(self):
         r=FakeRunner()
-        with mock.patch.object(modules,'_disabled_systemd_unit') as unit:
+        with mock.patch('llmsetup.component_novnc_setup.configure_novnc') as setup:
             modules.novnc(r,{},None)
-            unit.assert_called_once()
-            self.assertIn('127.0.0.1:6080', unit.call_args.args[2])
-            self.assertIn('127.0.0.1:5901', unit.call_args.args[2])
-            self.assertEqual(r.packages,['novnc','websockify'])
-            self.assertFalse(r.commands)
+            setup.assert_called_once_with(r,{},None)
 
     def test_jupyter_dedicated_user_and_token(self):
         r=FakeRunner()
