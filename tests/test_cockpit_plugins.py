@@ -93,15 +93,15 @@ class BookmarksReleaseTests(unittest.TestCase):
 class CockpitListenerTests(unittest.TestCase):
     def test_exact_private_socket_override(self):
         self.assertTrue(_secure_cockpit_override(
-            '# Managed by debian-llm-postinstall\\n[Socket]\\nListenStream=\\nListenStream=127.0.0.1:9090\\n'))
+            '# Managed by debian-llm-postinstall\n[Socket]\nListenStream=\nListenStream=127.0.0.1:9090\n'))
 
     def test_rejects_extra_public_listener(self):
         self.assertFalse(_secure_cockpit_override(
-            '[Socket]\\nListenStream=\\nListenStream=127.0.0.1:9090\\nListenStream=0.0.0.0:9090\\n'))
+            '[Socket]\nListenStream=\nListenStream=127.0.0.1:9090\nListenStream=0.0.0.0:9090\n'))
 
     def test_rejects_no_reset(self):
         self.assertFalse(_secure_cockpit_override(
-            '[Socket]\\nListenStream=127.0.0.1:9090\\n'))
+            '[Socket]\nListenStream=127.0.0.1:9090\n'))
 
 
 class GitHubSyncStagingTests(unittest.TestCase):
