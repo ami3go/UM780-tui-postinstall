@@ -7,7 +7,7 @@ from unittest import mock
 
 from llmsetup.component_cockpit_plugins import (
     BOOKMARKS_REPOSITORY, GHSYNC_REPOSITORY, GHSYNC_SHA,
-    _ghsync_stage_files, _read_state, _state_text, cockpit_bookmarks,
+    _ghsync_stage_files, _read_state, _state_text, _secure_cockpit_override, cockpit_bookmarks,
     select_bookmarks_asset,
 )
 from llmsetup.components import ALL, INSTALLERS
@@ -88,6 +88,20 @@ class BookmarksReleaseTests(unittest.TestCase):
             with mock.patch('llmsetup.component_cockpit_plugins._check_cockpit'):
                 with mock.patch('llmsetup.component_cockpit_plugins.BOOKMARKS_DIR', base):
                     cockpit_bookmarks(R(), {}, None)
+
+
+class CockpitListenerTests(unittest.TestCase):
+    def test_exact_private_socket_override(self):
+        self.assertTrue(_secure_cockpit_override(
+            '# Managed by debian-llm-postinstall\\n[Socket]\\nListenStream=\\nListenStream=127.0.0.1:9090\\n'))
+
+    def test_rejects_extra_public_listener(self):
+        self.assertFalse(_secure_cockpit_override(
+            '[Socket]\\nListenStream=\\nListenStream=127.0.0.1:9090\\nListenStream=0.0.0.0:9090\\n'))
+
+    def test_rejects_no_reset(self):
+        self.assertFalse(_secure_cockpit_override(
+            '[Socket]\\nListenStream=127.0.0.1:9090\\n'))
 
 
 class GitHubSyncStagingTests(unittest.TestCase):
