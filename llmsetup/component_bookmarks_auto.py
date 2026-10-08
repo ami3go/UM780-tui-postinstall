@@ -226,7 +226,13 @@ def sync_bookmarks(r=None, cfg=None, ui=None, *, config_path=None, package_path=
     if not package_path.is_file() or package_path.is_symlink():
         raise SetupError('Cockpit Bookmarks is not installed; install cockpit_bookmarks first')
     LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(LOCK_PATH, 'a+', encoding='utf-8') as lock:
+    flags = os.O_CREAT | os.O_RDWR | getattr(os, 'O_NOFOLLOW', 0)
+    fd = os.open(LOCK_PATH, flags, 0o600)
+    with os.fdopen(fd, 'r+', encoding='utf-8') as lock:
+        info = os.fstat(lock.fileno())
+        if (not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) & 0o077
+                or info.st_nlink != 1 or (os.geteuid() == 0 and info.st_uid != 0)):
+            raise SetupError('Insecure Cockpit Bookmarks sync lock file')
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
         current, old, info = _read_config(config_path)
         entries = desired_entries(exists=exists, command_exists=command_exists, services=current['services'])
