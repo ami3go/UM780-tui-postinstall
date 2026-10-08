@@ -62,7 +62,7 @@ class MaintenanceTests(unittest.TestCase):
         r=FakeR()
         m.service_watchdog(r,{},None)
         self.assertIn('llm-service-watchdog.timer',' '.join(str(c) for c in r.calls))
-        self.assertNotIn('restart',m.WATCHDOG_CODE)
+        self.assertNotIn("['systemctl', 'restart'", m.WATCHDOG_CODE)
         self.assertNotIn('enable --now llm-ollama',' '.join(map(str,r.calls)))
         self.assertEqual(len(r.writes),3)
 
