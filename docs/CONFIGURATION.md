@@ -9,6 +9,7 @@ This file describes the **current code behavior**, not proposed settings. The si
 | `target_os` | `"debian-13"` | Yes | Must match exactly, not a general-purpose distro selector |
 | `host` | `"bare-metal"` | Yes | VMs and containers rejected by preflight |
 | `components` | 18 selected; 5 additional optional | Yes | TUI initially checks each item; see component order below |
+| `auto_bookmarks` | `true` | Yes | After an apply run, merge missing application cards if Cockpit Bookmarks is installed; disable to opt out |
 | `model` | `"qwen2.5-coder:7b"` | Yes | For `models`, only prefixes `qwen2.5-coder:` and `qwen3-coder:` pass the current basic check |
 | `webui_bind` | `"127.0.0.1"` | **No** | Informational only; listener address is hardcoded in the service |
 | `llama_model_path` | `""` | Yes | Optional existing GGUF path under selected `models/gguf/`; also set by `--gguf` |
@@ -46,6 +47,7 @@ The modules are evaluated in the following fixed order, even with several `--com
 | 21 | `jupyterlab` | Debian JupyterLab; localhost token-authenticated service |
 | 22 | `vnc` | TigerVNC/XFCE template; explicit user password and activation |
 | 23 | `novnc` | Websockify/noVNC proxy; requires running VNC backend, manual activation |
+| 24 | `bookmark_sync` | Explicit idempotent Cockpit Bookmarks application rescan; auto-hook is on even when unchecked |
 
 **No dependency resolver exists.** `--apply --component models` does not automatically install Ollama, for example. If you select multiple modules, only those modules are run; ordering follows the list above.
 
@@ -72,6 +74,8 @@ sudo python3 install.py --apply --component ollama --component webui
 sudo python3 install.py --apply --component models  # opt-in download prompt
 sudo python3 install.py --health
 ```
+
+For automatic application bookmarks, see [Bookmarks auto-configuration](BOOKMARKS_AUTO.md). It is controlled by the separate `auto_bookmarks` JSON setting; `bookmark_sync` can also be called explicitly.
 
 For headless tools and optional browser/desktop services, see [Optional tools](OPTIONAL_TOOLS.md). These five remote-facing optional modules are not selected by default; enable only after reviewing their separate authentication boundaries.
 
