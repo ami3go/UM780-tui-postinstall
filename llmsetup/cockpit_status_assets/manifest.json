@@ -1,0 +1,13 @@
+{
+  "version": 0,
+  "requires": {
+    "cockpit": "215"
+  },
+  "tools": {
+    "index": {
+      "label": "UM780 Status",
+      "order": 45
+    }
+  },
+  "owner": "um780-postinstall-managed"
+}
