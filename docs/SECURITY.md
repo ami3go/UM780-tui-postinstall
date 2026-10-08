@@ -29,6 +29,14 @@ sudo systemctl list-units '*ollama*' '*code-server*' '*cockpit*'
 
 The current `--health` wildcard-listener check does not reliably detect listeners bound to a **specific** external IP, unexpected ports or sidecar services. Exit status 0 is not a security attestation.
 
+## Cockpit plugin trust boundary
+
+`cockpit_ghsync` executes the audited-pin upstream GitHub Sync install script in an isolated staging tree and installs validated files. GitHub CLI credentials are **per-user**; the installer does not log in, sync repositories, or set a schedule. A GitHub token can access private repositories according to its scope, so do not invoke syncing under root or share the token.
+
+`cockpit_bookmarks` is deployed from a SHA256-verified stable GitHub release `.deb`. Its page has no standalone daemon, but manually activated terminal/application launchers can expose writable shells. Review upstream launcher bind/auth/write/timeout settings before starting one. The installer does not preconfigure or auto-run launchers.
+
+Both plugin modules require the Cockpit loopback socket override. File presence checks in `--health` do not prove login security. See [Cockpit plugins](COCKPIT_PLUGINS.md).
+
 ## FileBrowser Quantum: outstanding write-permission risk
 
 The `filebrowser` module currently joins the `filebrowser` system account to `llmshare` and creates the model directory group-owned by `llmshare` with mode `2775`. That allows group write access. The generated FileBrowser Quantum config does **not** set per-source immutable/read-only filesystem restrictions or fully restrict default user permissions.
