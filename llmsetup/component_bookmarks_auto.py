@@ -39,6 +39,8 @@ WEB_APPS = (
      '/etc/systemd/system/llm-filebrowser.service', 'Server file manager'),
     ('jupyterlab', 'JupyterLab', 8888, 'http://127.0.0.1:8888/lab', '🧪',
      '/etc/systemd/system/llm-jupyterlab.service', 'Token-authenticated Python notebooks'),
+    ('uptime_kuma', 'Uptime Kuma', 3001, 'http://127.0.0.1:3001/', '📈',
+     '/etc/systemd/system/llm-uptime-kuma.service', 'Local monitoring and notifications; create admin on first visit'),
     ('novnc', 'noVNC Desktop', 6080, 'http://127.0.0.1:6080/vnc.html', '🖥️',
      '/etc/systemd/system/llm-novnc.service', 'Virtual XFCE desktop with generated VNC password; retrieve with sudo cat /etc/llm-postinstall/novnc-vnc-password on the server'),
 )
@@ -50,6 +52,7 @@ TERM_APPS = (
     ('btop', 'btop', 'btop', '📊', 47201),
     ('mc', 'Midnight Commander', 'mc', '📂', 47202),
     ('aoe', 'Agent of Empires', 'aoe', '🏛️', 47203),
+    ('opencode', 'OpenCode', 'opencode', '⌨️', 47204),
 )
 
 
