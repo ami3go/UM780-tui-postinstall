@@ -36,6 +36,12 @@ Reviewed against `main` source on **2026-10-08**. This is a transparent engineer
 
 **Phase 3: hardware acceptance** — REL-01, GPU-01, CI-01 and PERF-01. Record real inference throughput, CPU vs Vulkan, boot recovery, SSD and memory behavior.
 
+## Cockpit Bookmarks automation verification gaps
+
+- **MEDIUM (BM-01):** Additive bookmark JSON writes use a separate advisory lock and pre-rename byte comparison, not Cockpit's optimistic file tags. An administrator editing the page at the same time can still race; avoid concurrent UI edits until an integration API is available.
+- **MEDIUM (BM-02):** Generated localhost web URLs need SSH forwarding on the **client**; no direct LAN or Tailscale Serve publishing exists. Terminal launchers expose writable, localhost-only shells on click and require individual forwarded ports.
+- **MEDIUM (BM-03):** Bookmarks schema v2 launchers and actual startup/authentication have not been exercised in a real Debian/Cockpit session; file-presence health checks do not prove frontend compatibility. Confirm with [acceptance](ACCEPTANCE.md).
+
 ## Additional optional-tool verification gaps
 
 - **HIGH (REMOTE-01):** ttyd/Jupyter/VNC/noVNC have no physical Debian 13 browser/session integration evidence. Their host listener policies, VNC password handling, Jupyter token login, XFCE startup, and root-denial gate require a real security acceptance test.
