@@ -1,131 +1,92 @@
-# UM780 Pro — Debian 13 headless LLM post-install
+# UM780-tui-postinstall
 
-Modular, rerunnable TUI for a **bare-metal Minisforum UM780 Pro** (Radeon 780M, 64 GB RAM, 2 × 512 GB NVMe) running **Debian 13 minimal**. Installs native services with systemd. No Docker, no Rust coreutils replacement.
+A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal local-LLM server. Designed around a Minisforum UM780 Pro, Ryzen 7 7840HS / Radeon 780M, 64 GB RAM and two 512 GB NVMe drives. No Docker is installed by this project.
 
-**Status:** pre-release. Unit-tested offline only; installation and AMD Vulkan inference have **not** yet been verified on the target machine. Read the plan and back up important data before applying.
+> **Status: PRE-RELEASE — unvalidated on the target hardware.** The GitHub Actions workflow tests Python logic on Ubuntu runners; it does not install the stack on Debian, exercise the Radeon GPU, verify login flows, or prove data safety across reboots. Back up both disks before first use. See [known limitations](docs/KNOWN_ISSUES.md) and [hardware acceptance checks](docs/ACCEPTANCE.md).
+
+## Documentation
+
+| Guide | Purpose |
+| --- | --- |
+| [Installation](docs/INSTALLATION.md) | Prerequisites, staged install, selecting existing second NVMe, first login |
+| [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
+| [Architecture](docs/ARCHITECTURE.md) | Modules, state, systemd and data flows, design constraints |
+| [Operations](docs/OPERATIONS.md) | Start/stop, SSH/Tailscale forwarding, updates, backups, diagnostics |
+| [Security and storage](docs/SECURITY.md) | Threat model, disk safeguards, permissions, network exposure and trust |
+| [Known issues](docs/KNOWN_ISSUES.md) | Implementation gaps and unverified integration assumptions |
+| [Development and testing](docs/DEVELOPMENT.md) | Test suite, CI scope, contribution and documentation rules |
+| [Acceptance checklist](docs/ACCEPTANCE.md) | Evidence required before first production deployment |
 
 ## Quick start
 
+On an existing **Debian 13 x86_64, bare-metal** installation, preferably with SSH and working DNS:
+
 ```sh
 sudo apt update
-sudo apt install -y python3 git
+sudo apt install -y git python3
 git clone https://github.com/ami3go/UM780-tui-postinstall.git
 cd UM780-tui-postinstall
 python3 install.py --plan
 python3 -m unittest discover -s tests -v
+# Stage modules one at a time after reading docs/INSTALLATION.md:
+sudo python3 install.py --apply --component base
+sudo python3 install.py --apply --component vulkan
+# Interactive TUI / numbered fallback (selects every module by default):
 sudo python3 install.py
 sudo python3 install.py --health
 ```
 
-Choose modules interactively (whiptail checkbox when available; numbered fallback). Initial configuration is in [config.json](config.json). You can change the selected modules before applying them.
+**Do not select the full default checklist until the known integration risks have been reviewed.** If `whiptail` is not yet installed, the installer uses a numbered text selection screen. The `--plan` command is a high-level read-only plan, **not** a full diff of package, fstab or service changes. Use `--component` to reduce scope; dependencies are not automatically resolved.
 
-Install/re-run individual modules without opening the TUI:
+## Available components
 
-```sh
-sudo python3 install.py --apply --component base
-sudo python3 install.py --apply --component vulkan
-sudo python3 install.py --apply --component ollama
-sudo python3 install.py --apply --component webui
-sudo python3 install.py --health
-```
-
-`--plan` is read-only; `--health` performs non-destructive checks. `--yes` skips routine prompts, but **never bypasses the typed SSD UUID authorization**. Do not use unattended application for storage changes.
-
-## Components
-
-| Module | Installation / endpoint |
+| Component | Effect |
 | --- | --- |
-| `base` | Debian packages, SSH, whiptail |
-| `storage` | Detect existing second-SSD filesystem; optionally mount after typed UUID confirmation |
-| `vulkan` | AMD firmware, Mesa Vulkan, diagnostic tools |
-| `llama` | Compile llama.cpp Vulkan; server on 127.0.0.1:8081 **only when GGUF configured** |
-| `ollama` | Native Ollama, 127.0.0.1:11434 |
-| `webui` | Native Open WebUI using Python 3.11/uv, 127.0.0.1:3000 |
-| `models` | Opt-in Qwen2.5-Coder 7B pull, can consume multiple GB |
-| `cockpit` | Cockpit on 127.0.0.1:9090 (HTTPS) |
-| `filebrowser` | FileBrowser Quantum, 127.0.0.1:8082 |
-| `codeserver` | code-server, 127.0.0.1:8443 |
-| `tailscale` | Install signed repository and service; requires manual `tailscale up` |
-| `updates` | Debian unattended security upgrades; no automatic reboot |
-| `benchmarks` | CPU benchmark and GPU/system diagnostics |
+| `base` | Apt prerequisites and SSH |
+| `storage` | Offers to mount a **pre-existing**, unmounted ext4/XFS/Btrfs filesystem; exact UUID typed confirmation |
+| `vulkan` | AMD firmware and Vulkan packages; diagnostic probe |
+| `llama` | Builds llama.cpp with Vulkan; server remains unconfigured until a local GGUF is selected |
+| `ollama` | Native local Ollama API, `127.0.0.1:11434` |
+| `webui` | Python 3.11/uv Open WebUI, `127.0.0.1:3000` |
+| `models` | Optional `qwen2.5-coder:7b` pull into Ollama |
+| `cockpit` | Cockpit HTTPS `127.0.0.1:9090` |
+| `filebrowser` | FileBrowser Quantum v1.5.6-stable, `127.0.0.1:8082` |
+| `codeserver` | code-server HTTP `127.0.0.1:8443` |
+| `tailscale` | Tailscale software and daemon, **manual enrollment required** |
+| `updates` | Debian unattended security updates; no automatic reboot |
+| `benchmarks` | sysbench CPU and basic Vulkan/system diagnostics; **not** LLM tokens/second |
 
-Services use dedicated service accounts and systemd units. Upstream GitHub release assets are required to have SHA256 digests. Existing managed files are backed up before changes; unrelated files are not silently overwritten.
+The default `config.json` selects **all** components and the Qwen model. Dependencies are not installed implicitly by per-component reruns. Only the `models` module prompts before pulling a model; `--yes` accepts that prompt as well as the initial apply prompt, so review the plan first.
 
-## Storage safety
+## Access model
 
-The script **does not format, wipe, repartition, resize, or initialize disks**. It discovers only an *existing unmounted* ext4/XFS/Btrfs partition on a non-root disk. Ambiguous layouts (RAID, LVM, dm-crypt) are deliberately excluded.
-
-If accepted, the installer requires entering the partition's full UUID; it adds a UUID-based `/etc/fstab` entry for `/srv/llm-data`, attempts the mount, and restores the previous fstab if mounting fails. Model data then goes under `/srv/llm-data/models`. Otherwise the fallback is `/var/lib/llm-stack/models`. A mountpoint already in use is left unchanged.
-
-Inspect `lsblk -f` and take backups before selecting any partition. **Never accept storage operations based on disk numbering alone.**
-
-## Access from LAN or Tailnet
-
-The web interfaces and model APIs listen **on localhost only** by default; they do not become directly exposed on the LAN/Tailnet. Use SSH port forwarding (or configure a separately authenticated reverse proxy / Tailscale Serve after installation).
+Management and inference listeners are configured for **localhost only**. This does **not** provide direct LAN access by default; LAN and Tailscale access are via SSH forwarding unless you separately configure an authenticated ingress. From your client:
 
 ```sh
 ssh -N -L 3000:127.0.0.1:3000 -L 11434:127.0.0.1:11434 \
-  -L 9090:127.0.0.1:9090 -L 8443:127.0.0.1:8443 \
-  -L 8082:127.0.0.1:8082 user@SERVER_IP
+  -L 9090:127.0.0.1:9090 -L 8082:127.0.0.1:8082 \
+  -L 8443:127.0.0.1:8443 user@SERVER_IP
 ```
 
-Use http://127.0.0.1:3000 for Open WebUI, https://127.0.0.1:9090 for Cockpit and http://127.0.0.1:8443 for code-server. After running `sudo tailscale up` on the server, you can SSH to its Tailscale IP using the same forwarding method. Never publish an unauthenticated Ollama API on the public internet.
+Browse `http://127.0.0.1:3000` (Open WebUI) or `https://127.0.0.1:9090` (Cockpit; inspect browser certificate warning). **Do not expose Ollama's unauthenticated API** to untrusted networks. Tailscale `up` and any Tailscale Serve setup are manual.
 
-## Secrets, logs and state
+## Data protection and integrity
 
-On initial setup, random passwords are written to root-only files and **reused on reruns**:
+- **No `mkfs`, `wipefs`, repartitioning, or resizing operations are implemented.** An existing second-disk filesystem may be mounted only after entering its complete UUID. The script **does modify** `/etc/fstab` and mount state if authorized.
+- Data stored by Ollama and llama.cpp lives under `/var/lib/llm-stack/models` or, following a successful optional mount, `/srv/llm-data/models`. Existing filesystems and data are **not** backed up by the installer.
+- Systemd services and app configuration are installed or changed. Reruns are only **partially idempotent**; no transaction-wide rollback or automatic package uninstall exists.
+- Binary releases are downloaded from upstream GitHub releases and require the API-provided SHA256 digest. Other sources (apt repositories, Python packages and Git source) follow their respective trust mechanisms; versions are **not all pinned**.
+- **FileBrowser Quantum's model source is not enforced read-only by current code**. Treat its credentials as privileged model-storage access. See [Security](docs/SECURITY.md).
 
-```sh
-sudo cat /etc/llm-postinstall/webui-admin-password       # admin@llm.local
-sudo cat /etc/llm-postinstall/filebrowser-admin-password # admin
-sudo cat /etc/llm-postinstall/codeserver-password
-```
-
-Log directory: `/var/log/llm-postinstall/`. Last module statuses: `/var/lib/llm-postinstall/last-run.json`. Managed systemd units: `/etc/systemd/system/llm-*.service`. Backups: `/var/backups/llm-postinstall/`.
-
-No automatic uninstall/rollback of apt packages or downloaded applications is promised. Do not commit credentials, logs, private keys or downloaded model files.
-
-## llama.cpp GGUF
-
-Ollama's managed model storage is separate from llama.cpp GGUF files. To start llama-server, place a verified GGUF under the selected `models/gguf` directory and rerun:
+## Status and support
 
 ```sh
-sudo python3 install.py --apply --component llama \
-  --gguf /srv/llm-data/models/gguf/my-coder.gguf
-```
-
-Substitute `/var/lib/llm-stack/models/gguf/` if the second disk was not mounted. Check `vulkaninfo --summary`, then systemd logs and `llama-bench` to confirm **real** GPU offload. Ollama on this APU may use CPU despite the presence of Radeon 780M; ROCm support is not assumed.
-
-## Verification
-
-```sh
-python3 -m compileall -q .
-python3 -m unittest discover -s tests -v
 python3 install.py --plan
 sudo python3 install.py --health
-sudo journalctl -u llm-ollama -u llm-webui -n 80 --no-pager
-sudo ss -lntp | grep -E '11434|8081|3000|8082|8443|9090'
+sudo systemctl status llm-ollama.service llm-webui.service --no-pager
+sudo journalctl -u llm-ollama.service -n 60 --no-pager
 ```
 
-After a real installation, validate mount persistence across reboot, no unexpected open network listeners, WebUI and code-server authentication, Qwen response generation, GPU offload versus CPU-only tok/s, and rerunning one module without losing state.
+`--health` can report `PASS`/`WARN`/`FAIL`/`PENDING`, but it is a **shallow availability check**, not a proof of GPU offload, successful inference, security, password login, or disk integrity. Unhealthy services may show only `WARN` and produce exit code 0; consult [Operations](docs/OPERATIONS.md).
 
-**The offline suite does not prove on-device installation success.** See [the target acceptance checklist](docs/ACCEPTANCE.md).
-
-## Architecture
-
-```text
-install.py                   CLI entry point
-llmsetup/cli.py              TUI, plan, per-module execution and run-state
-llmsetup/core.py             Command runner, safe file writes, managed accounts
-llmsetup/assets.py           Verified downloads
-llmsetup/storage.py          Safe existing-partition detection and UUID mounting
-llmsetup/component_base.py   Base dependencies, Vulkan, llama.cpp
-llmsetup/component_llms.py   Ollama, Open WebUI and Qwen model
-llmsetup/component_addons.py Cockpit, Quantum, code-server, Tailscale, updates
-llmsetup/components.py       Module registry
-llmsetup/health.py           Read-only diagnostics
-tests/                       Unittest safety and workflow coverage
-.github/workflows/           CI on push and pull request
-```
-
-Official references: [Debian packages](https://packages.debian.org/trixie/) · [llama.cpp Vulkan](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md) · [Ollama](https://github.com/ollama/ollama) · [Open WebUI](https://docs.openwebui.com/) · [Tailscale](https://tailscale.com/kb).
+Read [Known issues](docs/KNOWN_ISSUES.md) before deployment. Feature and safety work should be addressed in focused PRs with tests before claiming this installer production-ready.
