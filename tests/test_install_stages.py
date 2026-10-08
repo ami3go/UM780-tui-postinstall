@@ -132,8 +132,8 @@ class StagedTUITests(unittest.TestCase):
 
     def test_plain_terminal_guides_through_all_five_categories(self):
         out=io.StringIO()
-        with mock.patch.object(cli.shutil,'which',return_value=None), \\
-             mock.patch('builtins.input',side_effect=['1','','','','']), \\
+        with mock.patch.object(cli.shutil,'which',return_value=None), \
+             mock.patch('builtins.input',side_effect=['1','','','','']), \
              redirect_stdout(out):
             selected=cli.UI().checklist(list(self.cfg['components']))
         self.assertIn('preflight',selected)
@@ -141,13 +141,13 @@ class StagedTUITests(unittest.TestCase):
         self.assertEqual(out.getvalue().count('=== STEP'),5)
 
     def test_cancel_aborts_selection_without_apply(self):
-        with mock.patch.object(cli.shutil,'which',return_value=None), \\
+        with mock.patch.object(cli.shutil,'which',return_value=None), \
              mock.patch('builtins.input',side_effect=['','q']):
             chosen=cli.UI().checklist(list(self.cfg['components']))
         self.assertIsNone(chosen)
 
     def test_invalid_stage_index_is_not_accepted(self):
-        with mock.patch.object(cli.shutil,'which',return_value=None), \\
+        with mock.patch.object(cli.shutil,'which',return_value=None), \
              mock.patch('builtins.input',return_value='99'):
             with self.assertRaisesRegex(Exception,'Invalid module number'):
                 cli.UI().checklist(list(self.cfg['components']))
