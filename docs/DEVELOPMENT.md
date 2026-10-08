@@ -108,3 +108,8 @@ Any stale docs that claim such guarantees should be updated in the same PR as th
 ## Staged installer metadata contract
 
 Maintain `llmsetup/install_stages.py` as the sole canonical component order. All components must be assigned to exactly one of the five stages and registry coverage validated by `tests/test_install_stages.py`. The TUI displays stage groups; CLI `--stage N` selects **only** defaults from `config.json`. Preserve manual installation consent, UUID confirmation and public-listener protections; prerequisite notes are advisory, never implicit installs. Update [staged installation](INSTALL_STAGES.md) and [configuration](CONFIGURATION.md) when modules move between stages.
+
+
+## Read-only inventory contract
+
+`llmsetup/inventory.py` defines local package/binary and configuration evidence for all 39 components. Keep its `INSTALL` registry exactly aligned with `llmsetup/install_stages.py` and `llmsetup/components.py`. Distinguish `INSTALLED ONLY`, `CONFIGURED ONLY`, `INSTALLED + CONFIGURED`, `UNVERIFIED`, and action-only modules; do not imply per-user auth or hardware acceptance. A scan must never call state-changing shell commands, read or print credential values, silently change TUI selections, or authorize installer skip/overwrite. Expand [inventory tests](../tests/test_inventory.py) with every new component or detection condition. See [inventory documentation](INSTALL_INVENTORY.md).
