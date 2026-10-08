@@ -15,7 +15,9 @@ SERVICE_MAP = {
  'webui': 'llm-webui.service', 'cockpit': 'cockpit.socket',
  'filebrowser': 'llm-filebrowser.service', 'codeserver': 'llm-codeserver.service',
  'tailscale': 'tailscaled.service', 'updates': 'apt-daily-upgrade.timer',
- 'jupyterlab': 'llm-jupyterlab.service', 'novnc': 'llm-novnc.service'
+ 'jupyterlab': 'llm-jupyterlab.service', 'novnc': 'llm-novnc.service',
+ 'service_watchdog': 'llm-service-watchdog.timer',
+ 'zram': 'zramswap.service', 'backup_restore': 'llm-backup.timer'
 }
 
 
@@ -61,6 +63,12 @@ def diagnostics(components=None):
             result.append(('FAIL', 'network exposure', f'{address} is public! Restrict TCP port {port}'))
     else:
         result.append(('WARN', 'network exposure', 'Cannot inspect listening port addresses (ss unavailable)'))
+    for name, binaries in [('hardware_health', ('nvme', 'smartctl', 'sensors')),
+                           ('developer_tools', ('rg', 'fdfind', 'fzf', 'lazygit', 'zoxide'))]:
+        if name in components:
+            missing = [cmd for cmd in binaries if shutil.which(cmd) is None]
+            result.append(('WARN' if missing else 'PASS', name,
+                           'missing: ' + ', '.join(missing) if missing else 'tools found on PATH'))
     if 'vulkan' in components:
         ok, msg = probe(['vulkaninfo', '--summary'], timeout=20)
         result.append(('PASS' if ok else 'WARN', 'vulkan',
