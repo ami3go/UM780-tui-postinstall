@@ -14,7 +14,7 @@ from .core import CONF_DIR, STATE_DIR, Runner, SetupError, detect_target, is_roo
 from .components import ALL, DESCRIPTIONS, INSTALLERS
 from .install_stages import STAGES, SETUP_NOTES, ordered_selection, selected_from_stages, manual_prerequisites
 from .component_safety import restore_config_snapshot
-from . import health
+from . import health, inventory
 from .component_bookmarks_auto import auto_sync_bookmarks
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -42,12 +42,13 @@ class UI:
             return p.stderr.strip() if p.returncode == 0 else ''
         return input(message)
 
-    def checklist(self, selected):
+    def checklist(self, selected, states=None):
         """Five sequential category screens; Cancel aborts the entire wizard.
 
         Unchecked entries stay unchecked; categorization never auto-selects.
         """
         selected = set(selected)
+        states = states or {}
         interactive = bool(shutil.which('whiptail') and sys.stdin.isatty())
         for stage in STAGES:
             print(f'\n=== STEP {stage.number}/{len(STAGES)}: {stage.name} ===')
@@ -60,7 +61,9 @@ class UI:
                     '23', '105', str(min(13, len(stage.components)))
                 ]
                 for name in stage.components:
-                    args += [name, DESCRIPTIONS[name],
+                    code = states[name].short if name in states else 'UNKNOWN'
+                    label = f'[{code}] {DESCRIPTIONS[name]}'
+                    args += [name, label[:88],
                              'ON' if name in selected else 'OFF']
                 p = subprocess.run(args, stderr=subprocess.PIPE, text=True, check=False)
                 if p.returncode:
@@ -76,7 +79,8 @@ class UI:
             else:
                 for idx, name in enumerate(stage.components, 1):
                     mark = 'x' if name in selected else ' '
-                    print(f' [{mark}] {idx:2d}. {name:20} {DESCRIPTIONS[name]}')
+                    code = states[name].short if name in states else 'UNKNOWN'
+                    print(f' [{mark}] {idx:2d}. {name:20} [{code:11}] {DESCRIPTIONS[name]}')
                 print('Toggle by numbers separated by commas; ENTER keeps, q cancels.')
                 value = input(f'Step {stage.number} selection: ').strip()
                 if value.lower() == 'q':
@@ -128,7 +132,8 @@ def show_stages(cfg):
     print('Use --component NAME or the guided TUI to explicitly select optional tools.')
 
 
-def plan(cfg, chosen):
+def plan(cfg, chosen, states=None):
+    states = states or {}
     print('=== UM780 DEBIAN 13 STAGED CHANGE PLAN ===')
     print('Target: Debian 13 x86_64 bare metal. Native systemd; no Docker.')
     print('Execution follows stage priority and defined within-stage order.')
@@ -142,6 +147,10 @@ def plan(cfg, chosen):
         for name in names:
             counter += 1
             print(f'  {counter:2d}. {name:20} {DESCRIPTIONS[name]}')
+            if name in states:
+                state = states[name]
+                run = 'running' if state.running else ('stopped' if state.running is False else 'n/a')
+                print(f'      Current: {state.status}; runtime: {run}')
             missing = manual_prerequisites(name, chosen)
             if missing:
                 print('      Verify previously installed prerequisites: ' + ', '.join(missing))
@@ -151,6 +160,7 @@ def plan(cfg, chosen):
     print('Safety: NO repartition, format, mkfs or implicit disk formatting.')
     print('Existing SSD mount may require exact typed UUID; preserve backups.')
     print('Prerequisites are advisory; they are NOT auto-installed or verified.')
+    print('Inventory reads local evidence only; it does not validate logins, version drift or disk safety.')
     print('Browser links to localhost require forwarding; no public ports added.')
     print('First-login and security activation steps remain separate from installation.')
     print('Run --health after setup; physical GPU/login/restore acceptance remains required.')
@@ -174,7 +184,7 @@ def execute(cfg, chosen, ui):
     print('Installation log:', runner.log_path)
     status_path = STATE_DIR / 'last-run.json'
     status = {'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-              'results': {}, 'components': chosen}
+              'results': {}, 'components': chosen, 'verification': {}}
     failures = 0
     previous_stage = None
     for name in chosen:
@@ -190,7 +200,11 @@ def execute(cfg, chosen, ui):
         try:
             INSTALLERS[name](runner, cfg, ui)
             status['results'][name] = 'OK'
-            runner.logger.info('PASS COMPONENT %s', name)
+            observed = inventory.inspect(name, cfg)
+            status['verification'][name] = observed.as_dict()
+            print('POST-INSTALL VERIFICATION:', observed.status,
+                  '| active=' + str(observed.running))
+            runner.logger.info('PASS COMPONENT %s; inventory=%s', name, observed.status)
         except Exception as exc:
             status['results'][name] = 'FAILED: ' + str(exc)
             failures += 1
@@ -227,6 +241,8 @@ def main(argv=None):
     p.add_argument('--component', action='append', choices=ALL, help='Explicit module selection; repeatable')
     p.add_argument('--stage', action='append', type=int, choices=[s.number for s in STAGES], help='Install default-selected modules in priority stage N (1..5); repeatable')
     p.add_argument('--list-stages', action='store_true', help='Read-only catalog of priorities, setup and optional modules')
+    p.add_argument('--inventory', action='store_true', help='Read-only scan: installed/configured/running for all modules (or --stage/--component)')
+    p.add_argument('--json', action='store_true', help='JSON inventory output; only with --inventory')
     p.add_argument('--yes', action='store_true', help='Accept ordinary prompts; never bypass typed storage UUID')
     p.add_argument('--restore-config', metavar='SNAPSHOT', help='Explicit config-only restore (requires typed RESTORE)')
     p.add_argument('--gguf', metavar='PATH', help='Use local GGUF inside selected model root and enable llama-server')
@@ -247,26 +263,38 @@ def main(argv=None):
             cfg['llama_model_path'] = args.gguf
         if args.stage and args.component:
             raise SetupError('--stage and --component cannot be combined; use the TUI for custom selections')
+        if args.json and not args.inventory:
+            raise SetupError('--json is only supported with --inventory')
         if args.list_stages:
             show_stages(cfg)
+            return 0
+        if args.inventory:
+            if args.stage:
+                chosen = ordered_selection(n for stage in STAGES if stage.number in args.stage
+                                           for n in stage.components)
+            else:
+                chosen = ordered_selection(args.component or ALL)
+            inventory.render(inventory.scan(chosen, cfg), selected=cfg['components'],
+                             json_mode=args.json)
             return 0
         if args.stage:
             chosen = selected_from_stages(args.stage, cfg['components'])
         else:
             chosen = ordered_selection(args.component or cfg['components'])
         if args.plan:
-            plan(cfg, chosen)
+            plan(cfg, chosen, inventory.scan(chosen, cfg))
             problems = detect_target()
             if problems: print('Preflight notes: ' + '; '.join(problems))
             return 0
         if args.health:
             return health.render(chosen)
         ui = UI(args.yes)
+        states = inventory.scan(ALL if not args.apply else chosen, cfg)
         if not args.apply:
-            selected = ui.checklist(chosen)
+            selected = ui.checklist(chosen, states=states)
             if selected is None: return 0
             chosen = selected
-        plan(cfg, chosen)
+        plan(cfg, chosen, states)
         if not chosen:
             print('No components selected.'); return 0
         if not args.yes and not ui.confirm('Apply the selected installation modules now?'):
