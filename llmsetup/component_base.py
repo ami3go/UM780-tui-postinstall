@@ -13,7 +13,7 @@ from .core import (CONF_DIR, OWNER_MARK, ROOT_DIR, STATE_DIR, SetupError,
 from .storage import configure_storage
 
 ALL = ['base', 'storage', 'vulkan', 'llama', 'ollama', 'webui', 'models',
-       'cockpit', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks']
+       'cockpit', 'cockpit_ghsync', 'cockpit_bookmarks', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks']
 DESCRIPTIONS = {
  'base': 'System utilities, SSH and prerequisite packages',
  'storage': 'Optional existing second-SSD mount (typed UUID approval)',
@@ -23,6 +23,8 @@ DESCRIPTIONS = {
  'webui': 'Open WebUI native Python 3.11 environment, authenticated',
  'models': 'Opt-in Qwen2.5-Coder:7b model download (~several GB)',
  'cockpit': 'Cockpit management, loopback-only TLS socket',
+ 'cockpit_ghsync': 'Your GitHub Sync Cockpit page (manual gh login)',
+ 'cockpit_bookmarks': 'Your Bookmarks Cockpit page (prebuilt .deb)',
  'filebrowser': 'FileBrowser Quantum stable, localhost, read-only model files',
  'codeserver': 'code-server native Debian package, localhost, password',
  'tailscale': 'Official signed Tailscale Debian 13 repository; login manual',
