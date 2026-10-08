@@ -36,6 +36,12 @@ Reviewed against `main` source on **2026-10-08**. This is a transparent engineer
 
 **Phase 3: hardware acceptance** — REL-01, GPU-01, CI-01 and PERF-01. Record real inference throughput, CPU vs Vulkan, boot recovery, SSD and memory behavior.
 
+## Additional optional-tool verification gaps
+
+- **HIGH (REMOTE-01):** ttyd/Jupyter/VNC/noVNC have no physical Debian 13 browser/session integration evidence. Their host listener policies, VNC password handling, Jupyter token login, XFCE startup, and root-denial gate require a real security acceptance test.
+- **MEDIUM (REMOTE-02):** ttyd v1.7.7 and AoE v1.17.2 are fixed upstream releases, and their asset/checksum availability must be confirmed against the official release API on a live host. Missing hashes fail closed. Upgrade is manual.
+- **MEDIUM (REMOTE-03):** The optional tools rely on a manually managed SSH tunnel and do not provide a managed auth/TLS reverse proxy. Bookmarks launchers remain separate and may bind differently if enabled.
+
 ## What the existing tests *do* verify
 
 The GitHub Actions workflow uses Python 3.11 and 3.13 on `ubuntu-latest` to byte-compile code, run the unittest suite and execute `--plan`. Relevant unit tests include candidate partition filtering, wrong-UUID refusal, secret-file handling, managed-file conflicts, digest requirements, and listener wildcard detection.
