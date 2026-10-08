@@ -12,6 +12,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
 | [Architecture](docs/ARCHITECTURE.md) | Modules, state, systemd and data flows, design constraints |
 | [Operations](docs/OPERATIONS.md) | Start/stop, SSH/Tailscale forwarding, updates, backups, diagnostics |
+| [Optional server tools](docs/OPTIONAL_TOOLS.md) | Fish, btop, MC, ttyd, AoE, JupyterLab and on-demand VNC/noVNC |
 | [Cockpit extensions](docs/COCKPIT_PLUGINS.md) | GitHub Sync and Bookmarks setup, access, security, and updates |
 | [Security and storage](docs/SECURITY.md) | Threat model, disk safeguards, permissions, network exposure and trust |
 | [Known issues](docs/KNOWN_ISSUES.md) | Implementation gaps and unverified integration assumptions |
@@ -58,8 +59,16 @@ sudo python3 install.py --health
 | `tailscale` | Tailscale software and daemon, **manual enrollment required** |
 | `updates` | Debian unattended security updates; no automatic reboot |
 | `benchmarks` | sysbench CPU and basic Vulkan/system diagnostics; **not** LLM tokens/second |
+| `fish` | Interactive shell; does not change default login shell |
+| `btop` | CLI CPU/memory/system activity monitor |
+| `mc` | Midnight Commander TUI file manager |
+| `ttyd` | Local-only browser terminal service; **disabled until explicitly enabled** |
+| `agent_of_empires` | User-run Agent of Empires `aoe`/tmux manager, no daemon |
+| `jupyterlab` | Authenticated, local-only notebook server, `127.0.0.1:8888` |
+| `vnc` | Optional TigerVNC virtual XFCE desktop, **not started**; password required |
+| `novnc` | Optional local noVNC proxy, **not started** until VNC is configured |
 
-The default `config.json` selects **all** components and the Qwen model. Dependencies are not installed implicitly by per-component reruns. Only the `models` module prompts before pulling a model; `--yes` accepts that prompt as well as the initial apply prompt, so review the plan first.
+The default `config.json` selects the original core components plus Fish, btop and Midnight Commander. The five higher-exposure optional tools (ttyd, Agent of Empires, JupyterLab, VNC and noVNC) start **unchecked**. The selected core modules the Qwen model. Dependencies are not installed implicitly by per-component reruns. Only the `models` module prompts before pulling a model; `--yes` accepts that prompt as well as the initial apply prompt, so review the plan first.
 
 ## Access model
 
