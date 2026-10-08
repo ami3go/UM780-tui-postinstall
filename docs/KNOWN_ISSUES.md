@@ -28,6 +28,13 @@ Reviewed against `main` source on **2026-10-08**. This is a transparent engineer
 | CI-01 | **MEDIUM** | Test coverage | CI compiles Python, runs mocked unittests and a plan command on Ubuntu, not Debian systemd on UM780 Pro. | Debian test VM/container where practical; supervised real-machine CI gate for hardware functions |
 | PERF-01 | **LOW** | Benchmark terminology | `benchmarks` writes CPU/sysbench and Vulkan summaries, not tokens/sec benchmarks. | Separate model benchmark command/evidence and performance thresholds |
 
+## Optional maintenance limitations
+
+- New optional `hardware_health` only produces a one-time report; no recurring SMART wear thresholds or physical alerts.
+- `service_watchdog` checks service activity with a timer and writes to journal but does not auto-restart or notify remotely.
+- `backup_restore` schedules config/state backups only after a pre-existing encrypted Restic repository has been configured on a separately mounted destination; data volumes and restore testing remain operator responsibilities.
+- `llm_benchmark` requires an existing valid GGUF and a locally built `llama-bench` binary. Real AMD Vulkan offload remains an acceptance gate.
+
 ## Where to start fixing
 
 **Phase 1: safety invariants** — SEC-01, STOR-01/02/03, SUP-01, NET-01. Require code tests and manual negative testing. No data-destructive or network-exposure regressions allowed.

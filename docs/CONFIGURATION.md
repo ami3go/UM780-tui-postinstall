@@ -9,6 +9,7 @@ This file describes the **current code behavior**, not proposed settings. The si
 | `target_os` | `"debian-13"` | Yes | Must match exactly, not a general-purpose distro selector |
 | `host` | `"bare-metal"` | Yes | VMs and containers rejected by preflight |
 | `components` | 18 selected; 5 additional optional | Yes | TUI initially checks each item; see component order below |
+| `backup_repository` | Not set | Optional | Existing separately mounted Restic repository path; until configured module only installs CLI |
 | `auto_bookmarks` | `true` | Yes | After an apply run, merge missing application cards if Cockpit Bookmarks is installed; disable to opt out |
 | `model` | `"qwen2.5-coder:7b"` | Yes | For `models`, only prefixes `qwen2.5-coder:` and `qwen3-coder:` pass the current basic check |
 | `webui_bind` | `"127.0.0.1"` | **No** | Informational only; listener address is hardcoded in the service |
@@ -48,6 +49,8 @@ The modules are evaluated in the following fixed order, even with several `--com
 | 22 | `vnc` | TigerVNC/XFCE template; explicit user password and activation |
 | 23 | `novnc` | Turnkey TigerVNC/XFCE :2 with generated VncAuth password, active localhost web proxy and Cockpit bookmark |
 | 24 | `bookmark_sync` | Explicit idempotent Cockpit Bookmarks application rescan; auto-hook is on even when unchecked |
+
+Seven additional unchecked modules: `hardware_health`, `backup_restore`, `cockpit_storage`, `service_watchdog`, `developer_tools`, `llm_benchmark`, and `zram`. See [Optional maintenance](OPTIONAL_MAINTENANCE.md) for installation and behavior.
 
 **No dependency resolver exists.** `--apply --component models` does not automatically install Ollama, for example. If you select multiple modules, only those modules are run; ordering follows the list above.
 
