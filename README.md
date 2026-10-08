@@ -8,6 +8,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 
 | Guide | Purpose |
 | --- | --- |
+| [Optional maintenance tools](docs/OPTIONAL_MAINTENANCE.md) | NVMe health, Restic, watchdog, zram, developer tools and model benchmarks |
 | [Installation](docs/INSTALLATION.md) | Prerequisites, staged install, selecting existing second NVMe, first login |
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
 | [Architecture](docs/ARCHITECTURE.md) | Modules, state, systemd and data flows, design constraints |
@@ -70,6 +71,13 @@ sudo python3 install.py --health
 | `vnc` | Optional TigerVNC virtual XFCE desktop, **not started**; password required |
 | `novnc` | Configures a dedicated XFCE VNC server + noVNC browser proxy; generates root-only VNC password, enables localhost services and adds Cockpit bookmark |
 | `bookmark_sync` | Rescan installed applications into Cockpit Bookmarks; automatic on successful apply by default |
+| `hardware_health` | Non-destructive SSD SMART, NVMe and temperature baseline |
+| `backup_restore` | Restic CLI, optional external encrypted backup timer after repository validation |
+| `cockpit_storage` | Storage and package update Cockpit pages |
+| `service_watchdog` | Read-only service monitoring timer and journal alerts |
+| `developer_tools` | Additional terminal Git and navigation tools |
+| `llm_benchmark` | Real llama-bench CPU/GPU throughput comparison (existing GGUF required) |
+| `zram` | zram-tools compressed swap in memory |
 
 The default `config.json` selects the original core components plus Fish, btop and Midnight Commander. The five additional components (ttyd, Agent of Empires, JupyterLab, VNC and noVNC) start **unchecked**. The selected core components still include the optional Qwen model download module. Dependencies are not installed implicitly by per-component reruns. Only the `models` module prompts before pulling a model; `--yes` accepts that prompt as well as the initial apply prompt, so review the plan first.
 
