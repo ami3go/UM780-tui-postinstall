@@ -87,6 +87,17 @@ class StatusTests(unittest.TestCase):
         self.assertFalse(state.configured)
         self.assertIsNone(state.running)
 
+    def test_configured_only_when_binary_removed_but_unit_remains(self):
+        p=FakeProbe()
+        p.units.add('llm-ollama.service')
+        p.contents['/etc/systemd/system/llm-ollama.service'] = '# Managed by debian-llm-postinstall'
+        p.contents['/etc/llm-postinstall/ollama.env'] = 'OLLAMA_HOST=127.0.0.1:11434'
+        state=inventory.inspect('ollama',{},p)
+        self.assertEqual(state.status,'CONFIGURED ONLY')
+        self.assertEqual(state.short,'CONFIG ONLY')
+        self.assertFalse(state.installed)
+        self.assertTrue(state.configured)
+
     def test_installed_only_when_unit_and_local_env_missing(self):
         p=FakeProbe()
         p.files.add('/opt/llm-stack/ollama/current/bin/ollama')
