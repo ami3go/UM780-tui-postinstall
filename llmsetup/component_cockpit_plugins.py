@@ -31,13 +31,19 @@ GHSYNC_STATE = CONF_DIR / 'cockpit-ghsync.json'
 BOOKMARKS_STATE = CONF_DIR / 'cockpit-bookmarks.json'
 
 
+def _secure_cockpit_override(contents):
+    """Only the reset and a single loopback address may be configured here."""
+    lines = [line.strip() for line in contents.splitlines()]
+    listeners = [line for line in lines if line.startswith('ListenStream=')]
+    return '[Socket]' in lines and listeners == ['ListenStream=', 'ListenStream=127.0.0.1:9090']
+
+
 def _check_cockpit():
     """Require an already installed, loopback-restricted Cockpit socket."""
     override = Path('/etc/systemd/system/cockpit.socket.d/llm-postinstall.conf')
     if not override.is_file() or override.is_symlink():
         raise SetupError('Install the cockpit module first (loopback socket override missing)')
-    lines = [line.strip() for line in override.read_text().splitlines()]
-    if 'ListenStream=127.0.0.1:9090' not in lines or 'ListenStream=' not in lines:
+    if not _secure_cockpit_override(override.read_text()):
         raise SetupError('Cockpit loopback restriction is missing or unexpected')
 
 
