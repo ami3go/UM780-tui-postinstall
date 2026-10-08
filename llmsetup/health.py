@@ -8,14 +8,14 @@ import subprocess
 import urllib.request
 from .core import detect_target
 
-MANAGEMENT_PORTS = (11434, 8081, 3000, 8082, 8443, 9090, 7681, 8888, 5901, 6080)
+MANAGEMENT_PORTS = (11434, 8081, 3000, 8082, 8443, 9090, 7681, 8888, 5901, 5902, 6080)
 
 SERVICE_MAP = {
  'llama': 'llm-llama.service', 'ollama': 'llm-ollama.service',
  'webui': 'llm-webui.service', 'cockpit': 'cockpit.socket',
  'filebrowser': 'llm-filebrowser.service', 'codeserver': 'llm-codeserver.service',
  'tailscale': 'tailscaled.service', 'updates': 'apt-daily-upgrade.timer',
- 'jupyterlab': 'llm-jupyterlab.service'
+ 'jupyterlab': 'llm-jupyterlab.service', 'novnc': 'llm-novnc.service'
 }
 
 
@@ -116,12 +116,17 @@ def diagnostics(components=None):
             installed = Path(binary).is_file()
             result.append(('PASS' if installed else 'WARN', component, 'binary installed; function not exercised'))
     for component, unit_name, port in [('ttyd', 'llm-ttyd.service', 7681),
-                                        ('vnc', 'llm-vnc@.service', 5901),
-                                        ('novnc', 'llm-novnc.service', 6080)]:
+                                        ('vnc', 'llm-vnc@.service', 5901)]:
         if component in components:
             exists = Path('/etc/systemd/system', unit_name).is_file()
             result.append(('PENDING' if exists else 'WARN', component+'-activation',
                            'manual per-user setup required; check service instance/listener yourself'))
+    if 'novnc' in components:
+        vnc = probe(['systemctl', 'is-active', '--quiet', 'llm-novnc-vnc.service'])[0]
+        proxy = check_port('127.0.0.1', 6080)
+        backend = check_port('127.0.0.1', 5902)
+        result.append(('PASS' if vnc and proxy and backend else 'WARN', 'novnc-backend',
+                       f'XFCE desktop active={vnc}; 127.0.0.1:5902={backend}; 127.0.0.1:6080={proxy}; VNC auth untested'))
     if 'jupyterlab' in components:
         result.append(('PASS' if check_port('127.0.0.1', 8888) else 'WARN', 'jupyter-port',
                        '127.0.0.1:8888 (TCP only, token auth not tested)'))
