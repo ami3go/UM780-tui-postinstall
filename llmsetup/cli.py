@@ -176,7 +176,15 @@ def execute(cfg, chosen, ui):
     status = {'started_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'results': {}, 'components': chosen}
     failures = 0
+    previous_stage = None
     for name in chosen:
+        current_stage = next(stage for stage in STAGES if name in stage.components)
+        if previous_stage != current_stage.number:
+            print(f'\n' + '='*64)
+            print(f'STEP {current_stage.number}/{len(STAGES)}: {current_stage.name}')
+            print(current_stage.objective)
+            runner.logger.info('BEGIN STAGE %s: %s', current_stage.number, current_stage.name)
+            previous_stage = current_stage.number
         print('\n' + '='*64 + f'\n[MODULE] {name}: {DESCRIPTIONS[name]}')
         runner.logger.info('START COMPONENT %s', name)
         try:
