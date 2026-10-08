@@ -31,11 +31,14 @@ The component registry in `llmsetup/components.py` imports functions from:
 
 - `component_base.py`: module list/description, base packages, storage, AMD Vulkan, llama.cpp.
 - `component_llms.py`: Ollama, uv/Python/Open WebUI, optional Qwen pull.
+- `component_cockpit_plugins.py`: Pinned upstream GitHub Sync Cockpit plugin; digest-verified Bookmarks Debian plugin.
 - `component_addons.py`: Cockpit, FileBrowser Quantum, code-server, Tailscale, unattended security upgrades, benchmark prerequisites.
 - `storage.py`: existing-filesystem candidate discovery, fstab entry construction, mount.
 - `core.py`: command execution, managed write/backups, system services, secrets, accounts and host preflight.
 - `assets.py`: release-asset SHA256 validation, streamed download and cache.
 - `health.py`: systemd, localhost ports, Vulkan, mount and listener checks.
+
+Plugin installers require the loopback Cockpit socket override and use upstream releases; they have no independent always-on TCP service. See [Cockpit plugins](COCKPIT_PLUGINS.md).
 
 This is modular **at the function/registry level**, not a third-party plugin interface. New modules require code changes and tests.
 
@@ -53,6 +56,8 @@ SSH server on Debian 13
   +- localhost:8082  FileBrowser Quantum
   +- localhost:8443  code-server
   \- localhost:9090  Cockpit HTTPS (PAM)
+       +- Tools / GitHub Sync (per-user gh credentials)
+       \- Bookmarks (optional on-demand launchers only)
   
   /dev/dri/renderD* <-- Vulkan/Mesa for llama.cpp, when working
   /srv/llm-data/models or /var/lib/llm-stack/models
