@@ -70,6 +70,17 @@ Fill in every field while performing real checks. Do not mark items green from P
 - [ ] Upstream binary versions/digests, Tailscale signing key fingerprint and Python wheel versions are recorded.
 - [ ] Signed Debian updates and repo trust paths work as configured.
 
+## Optional terminal, notebook and desktop additions
+
+- [ ] Fish, btop and mc run as normal users, with the login shell unchanged.
+- [ ] ttyd static asset checksum matches the pinned upstream manifest; service is disabled until explicitly enabled, and then listens **only** on `127.0.0.1:7681` under `llmterminal`.
+- [ ] AoE executable is pinned/verified, runs as a normal user, creates no root agent process or public dashboard.
+- [ ] JupyterLab is token-authenticated, executes under `llmjupyter`, and listens only on `127.0.0.1:8888`.
+- [ ] TigerVNC service cannot start as root or without a VNC password; a normal user receives a working virtual XFCE session on loopback `5901`.
+- [ ] noVNC stays disabled until explicitly enabled; WebSocket port `6080` is localhost-only and cannot bypass VNC authentication.
+- [ ] Untrusted LAN client cannot connect directly to ttyd, notebook, VNC or noVNC; SSH forwarded access works.
+- [ ] Re-run the modules without starting disabled services or overwriting external executables/configuration.
+
 ## D. CPU, GPU, memory, temperature and throughput
 
 - [ ] Same quantized GGUF, prompt and batch settings used for CPU-only and Vulkan offload runs.
