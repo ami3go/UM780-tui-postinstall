@@ -285,25 +285,6 @@ WantedBy=multi-user.target
 
 
 def novnc(r, cfg, ui):
-    """WebSocket proxy to local TigerVNC; do not start before VNC auth is set."""
-    r.apt('novnc', 'websockify')
-    _disabled_systemd_unit(r, NOVNC_UNIT, """[Unit]
-Description=Local-only noVNC HTML5 proxy for TigerVNC
-After=network.target
-[Service]
-Type=simple
-User=nobody
-Group=nogroup
-ExecStart=/usr/bin/websockify --web /usr/share/novnc 127.0.0.1:6080 127.0.0.1:5901
-Restart=on-failure
-RestartSec=5
-NoNewPrivileges=yes
-PrivateTmp=yes
-ProtectHome=yes
-ProtectSystem=strict
-[Install]
-WantedBy=multi-user.target
-""")
-    print('noVNC installed, NOT started. Set up VNC auth and enable the VNC server first.')
-    print('Then: sudo systemctl enable --now llm-novnc.service')
-    print('Access via SSH port forwarding, http://127.0.0.1:6080/vnc.html')
+    """Turnkey dedicated XFCE desktop + noVNC, password generated securely."""
+    from .component_novnc_setup import configure_novnc
+    return configure_novnc(r, cfg, ui)

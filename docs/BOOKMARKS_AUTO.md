@@ -33,9 +33,9 @@ Web cards are created **only if their systemd service unit is installed**, not m
 | code-server | `http://127.0.0.1:8443/` | `llm-codeserver.service` exists |
 | FileBrowser Quantum | `http://127.0.0.1:8082/` | `llm-filebrowser.service` exists |
 | JupyterLab | `http://127.0.0.1:8888/lab` | `llm-jupyterlab.service` exists |
-| noVNC Desktop | `http://127.0.0.1:6080/vnc.html` | `llm-novnc.service` exists |
+| noVNC Desktop | `http://127.0.0.1:6080/vnc.html` | `llm-novnc.service` exists; generated VNC password remains in `/etc/llm-postinstall/novnc-vnc-password` (root only) |
 
-Cards are grouped under **UM780 Web Apps**, tagged `um780` and `ssh-tunnel`, with automatic status polling disabled (the server can have a live localhost port that the user's browser cannot access). Some service units, notably noVNC, are provisioned **disabled** until the operator activates them. A bookmark is not proof that its backend is running.
+Cards are grouped under **UM780 Web Apps**, tagged `um780` and `ssh-tunnel`, with automatic status polling disabled (the server can have a live localhost port that the user's browser cannot access). Some service units may be provisioned disabled until the operator activates them. **The novnc component is different:** selecting it now configures and enables its own dedicated VNC :2 desktop and noVNC browser proxy. The bookmark displays a retrieval hint for the root-held VNC password but never the secret itself; see [noVNC Desktop](NOVNC_DESKTOP.md). A bookmark is not proof that its backend is running.
 
 **Important: `127.0.0.1` in a bookmark points to the BROWSER's computer.** The installer does **not** weaken the service's server-side loopback binding or create a proxy. For each desired service, forward its TCP port via SSH:
 

@@ -46,7 +46,7 @@ The modules are evaluated in the following fixed order, even with several `--com
 | 20 | `agent_of_empires` | Verified upstream CLI and tmux; no web daemon |
 | 21 | `jupyterlab` | Debian JupyterLab; localhost token-authenticated service |
 | 22 | `vnc` | TigerVNC/XFCE template; explicit user password and activation |
-| 23 | `novnc` | Websockify/noVNC proxy; requires running VNC backend, manual activation |
+| 23 | `novnc` | Turnkey TigerVNC/XFCE :2 with generated VncAuth password, active localhost web proxy and Cockpit bookmark |
 | 24 | `bookmark_sync` | Explicit idempotent Cockpit Bookmarks application rescan; auto-hook is on even when unchecked |
 
 **No dependency resolver exists.** `--apply --component models` does not automatically install Ollama, for example. If you select multiple modules, only those modules are run; ordering follows the list above.
@@ -77,6 +77,8 @@ sudo python3 install.py --health
 
 For automatic application bookmarks, see [Bookmarks auto-configuration](BOOKMARKS_AUTO.md). It is controlled by the separate `auto_bookmarks` JSON setting; `bookmark_sync` can also be called explicitly.
 
+For the turnkey noVNC virtual desktop, separate root-only credential file, automatic systemd startup and generated bookmark, see [noVNC Desktop](NOVNC_DESKTOP.md).
+
 For headless tools and optional browser/desktop services, see [Optional tools](OPTIONAL_TOOLS.md). These five remote-facing optional modules are not selected by default; enable only after reviewing their separate authentication boundaries.
 
 For the Cockpit extensions, see [Cockpit plugins](COCKPIT_PLUGINS.md). Neither module logs into GitHub, starts sync jobs, or enables terminal launchers automatically.
@@ -97,7 +99,7 @@ For the Cockpit extensions, see [Cockpit plugins](COCKPIT_PLUGINS.md). Neither m
 | ttyd | `127.0.0.1:7681`, after explicit enable | HTTP/WebSocket | No app password; access via SSH tunnel, low-privilege service account |
 | JupyterLab | `127.0.0.1:8888` | HTTP | Per-instance token, SSH port forwarding |
 | TigerVNC | `127.0.0.1:5901`, after manual setup | VNC | VNC password; ordinary Linux account |
-| noVNC | `127.0.0.1:6080`, after manual enable | HTTP/WebSocket | VNC backend password; proxy has no separate login |
+| noVNC | `127.0.0.1:6080` when novnc module installed | HTTP/WebSocket | Generated root-only VNC password; dedicated backend at `127.0.0.1:5902` |
 
 All locations are host-side; SSH forward to view from another machine. The listener bindings are intended and **must be verified** with `ss -lntp` after installation. FileBrowser's current configured model source is **not reliably read-only**.
 

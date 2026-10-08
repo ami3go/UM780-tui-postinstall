@@ -42,6 +42,12 @@ Reviewed against `main` source on **2026-10-08**. This is a transparent engineer
 - **MEDIUM (BM-02):** Generated localhost web URLs need SSH forwarding on the **client**; no direct LAN or Tailscale Serve publishing exists. Terminal launchers expose writable, localhost-only shells on click and require individual forwarded ports.
 - **MEDIUM (BM-03):** Bookmarks schema v2 launchers and actual startup/authentication have not been exercised in a real Debian/Cockpit session; file-presence health checks do not prove frontend compatibility. Confirm with [acceptance](ACCEPTANCE.md).
 
+## Turnkey noVNC validation gaps
+
+- **HIGH (NOVNC-01):** The newly configured dedicated XFCE VNC desktop and websockify proxy have not been exercised on actual Debian 13 bare metal. Validate service startup, credential login, private port bindings and two reboot cycles before production.
+- **MEDIUM (NOVNC-02):** Classic VncAuth only honors eight password characters. The script deliberately generates eight random alphanumeric characters and confines access to SSH forwarded localhost. Treat password-file access as sensitive and do not publish browser ports.
+- **MEDIUM (NOVNC-03):** Password rotation is intentionally not automated. If credential files diverge or an unexpected existing service/user account conflicts, installation fails closed and needs manual reconciliation.
+
 ## Additional optional-tool verification gaps
 
 - **HIGH (REMOTE-01):** ttyd/Jupyter/VNC/noVNC have no physical Debian 13 browser/session integration evidence. Their host listener policies, VNC password handling, Jupyter token login, XFCE startup, and root-denial gate require a real security acceptance test.
