@@ -8,7 +8,7 @@ import subprocess
 import urllib.request
 from .core import detect_target
 
-MANAGEMENT_PORTS = (11434, 8081, 3000, 8082, 8443, 9090, 7681, 8888, 5901, 5902, 6080)
+MANAGEMENT_PORTS = (11434, 8081, 3000, 3001, 8082, 8443, 9090, 7681, 8888, 5901, 5902, 6080)
 
 SERVICE_MAP = {
  'llama': 'llm-llama.service', 'ollama': 'llm-ollama.service',
@@ -17,6 +17,7 @@ SERVICE_MAP = {
  'tailscale': 'tailscaled.service', 'updates': 'apt-daily-upgrade.timer',
  'jupyterlab': 'llm-jupyterlab.service', 'novnc': 'llm-novnc.service',
  'service_watchdog': 'llm-service-watchdog.timer',
+ 'uptime_kuma': 'llm-uptime-kuma.service',
  'zram': 'zramswap.service', 'backup_restore': 'llm-backup.timer'
 }
 
@@ -138,6 +139,17 @@ def diagnostics(components=None):
     if 'jupyterlab' in components:
         result.append(('PASS' if check_port('127.0.0.1', 8888) else 'WARN', 'jupyter-port',
                        '127.0.0.1:8888 (TCP only, token auth not tested)'))
+    for name, file in [('opencode', '/usr/local/bin/opencode'),
+                       ('llama_swap', '/usr/local/bin/llama-swap'),
+                       ('ups_wol', '/opt/llm-stack/cockpit-ups-wol/install.sh')]:
+        if name in components:
+            p = Path(file)
+            result.append(('PASS' if p.is_file() else 'WARN', name,
+                           'binary/source present; upstream execution not tested'))
+    if 'uptime_kuma' in components:
+        ok=check_port('127.0.0.1',3001)
+        result.append(('PASS' if ok else 'WARN','uptime-port',
+                       '127.0.0.1:3001 (TCP; authentication not verified)'))
     if 'tailscale' in components:
         ok, out = probe(['tailscale', 'status', '--json'])
         status = 'WARN'
