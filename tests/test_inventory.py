@@ -170,6 +170,36 @@ class StatusTests(unittest.TestCase):
         p.matches.add('/var/backups/llm-postinstall/snapshots/um780-config-*.tar.gz')
         self.assertEqual(inventory.inspect('config_snapshot',{},p).status,'ACTION DONE')
 
+    def test_commented_or_duplicate_ollama_environment_is_not_configured(self):
+        p=FakeProbe()
+        p.files.add('/opt/llm-stack/ollama/current/bin/ollama')
+        p.units.add('llm-ollama.service')
+        p.contents['/etc/systemd/system/llm-ollama.service']='# Managed by debian-llm-postinstall'
+        env='/etc/llm-postinstall/ollama.env'
+        p.contents[env]='# OLLAMA_HOST=127.0.0.1:11434\\nOLLAMA_HOST=0.0.0.0:11434'
+        self.assertEqual(inventory.inspect('ollama',{},p).status,'INSTALLED ONLY')
+        p.contents[env]='OLLAMA_HOST=127.0.0.1:11434\\nOLLAMA_HOST=0.0.0.0:11434'
+        self.assertEqual(inventory.inspect('ollama',{},p).status,'INSTALLED ONLY')
+
+    def test_llama_model_must_exist_inside_managed_gguf_dir(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)/'models'
+            gguf=root/'gguf'
+            gguf.mkdir(parents=True)
+            p=FakeProbe()
+            p.files.add('/opt/llm-stack/llama.cpp/build/bin/llama-server')
+            p.units.add('llm-llama.service')
+            p.contents['/etc/systemd/system/llm-llama.service']='# Managed by debian-llm-postinstall'
+            env='/etc/llm-postinstall/llama.env'
+            model=gguf/'test.gguf'
+            p.contents[env]='LLAMA_MODEL='+str(model)
+            self.assertEqual(inventory.inspect('llama',{'model_storage':str(root)},p).status,
+                             'INSTALLED ONLY')
+            model.write_bytes(b'mocked GGUF header')
+            self.assertEqual(inventory.inspect('llama',{'model_storage':str(root)},p).status,
+                             'INSTALLED + CONFIGURED')
+
     def test_cockpit_plugin_page_does_not_imply_user_auth(self):
         p=FakeProbe()
         p.files.add('/usr/share/cockpit/ghsync/manifest.json')
