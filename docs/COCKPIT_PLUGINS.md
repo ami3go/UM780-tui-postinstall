@@ -7,6 +7,10 @@ The TUI includes two optional Cockpit plugins maintained under the same GitHub a
 | `cockpit_ghsync` | [ami3go/ghsync](https://github.com/ami3go/ghsync) | CLI, maintenance helpers, system-wide Cockpit page |
 | `cockpit_bookmarks` | [ami3go/bookmarks](https://github.com/ami3go/bookmarks) | Prebuilt Cockpit Bookmarks Debian package and default config if absent |
 
+## Automatic bookmarks for installed apps
+
+When Cockpit Bookmarks is installed, the UM780 post-install script can auto-add web app links and on-demand terminal application cards for installed tools, without touching custom entries. The auto-hook is enabled by `auto_bookmarks: true` in the installer configuration; you can explicitly run `sudo python3 install.py --apply --component bookmark_sync`. See [automatic app bookmarks](BOOKMARKS_AUTO.md) for detection criteria, per-client SSH forwarding, launcher security and backup/recovery behavior.
+
 ## Safe install sequence
 
 Start with the Debian 13 host and the base Cockpit module. The plugin modules **intentionally refuse** to install unless the Cockpit loopback socket override is already present at `/etc/systemd/system/cockpit.socket.d/llm-postinstall.conf`.

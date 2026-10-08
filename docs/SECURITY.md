@@ -37,6 +37,10 @@ The current `--health` wildcard-listener check does not reliably detect listener
 
 Both plugin modules require the Cockpit loopback socket override. File presence checks in `--health` do not prove login security. See [Cockpit plugins](COCKPIT_PLUGINS.md).
 
+## Automatically added application bookmarks
+
+An enabled `auto_bookmarks` post-install hook appends local app links to `/etc/cockpit/cockpit-bookmarks.json` after successful apply runs. It backs up the existing file, refuses symlinks, preserves arbitrary existing entries, and never starts application services. Web bookmarks to `127.0.0.1` resolve on the **browser client** and require SSH port forwarding. Optional `gotty-launcher`-format ttyd terminal cards execute commands **on demand as the logged-in Cockpit user**; they remain writable shell endpoints without their own authentication. Do not expose the launcher ports. The file lock cannot fully serialize browser edits made using Cockpit's own optimistic file tags. See [Automatic bookmarks](BOOKMARKS_AUTO.md) for mitigation and recovery.
+
 ## Optional local development / remote desktop surfaces
 
 `ttyd` provides a writable terminal as the dedicated non-root `llmterminal` account and is **disabled initially**; it has no separate HTTP password and must be reached over an SSH tunnel. `agent_of_empires` is CLI-only and does not launch agents, Docker containers or an AoE dashboard automatically. JupyterLab runs as `llmjupyter`, bound to loopback with default token authentication; notebooks execute code. TigerVNC and noVNC are provided as disabled local-only services: a regular user's VNC password must be configured before opt-in activation. noVNC does not add independent authentication to the VNC stream.

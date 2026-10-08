@@ -70,6 +70,18 @@ Fill in every field while performing real checks. Do not mark items green from P
 - [ ] Upstream binary versions/digests, Tailscale signing key fingerprint and Python wheel versions are recorded.
 - [ ] Signed Debian updates and repo trust paths work as configured.
 
+## Automatic application bookmarks
+
+- [ ] After the Bookmarks plugin installs, default apply runs add only actually installed service links; no external addresses are exposed.
+- [ ] Installed Fish/btop/MC/AoE commands create on-demand terminal cards only when ttyd is also installed.
+- [ ] Generated launcher runtime is non-root, loopback-only, and has a 30-minute limit; no shell runs until explicitly clicked.
+- [ ] Existing custom bookmarks, favorites, title, history, custom fields and groups survive unchanged.
+- [ ] Repeated sync creates no duplicates or extra backups, and manual edits to generated bookmarks remain intact.
+- [ ] Invalid/future schema, symlink, oversized JSON and concurrent edit are rejected without data loss.
+- [ ] Each config change has a timestamped recoverable backup with correct file permissions/owner.
+- [ ] Browser on a different LAN client cannot open generated localhost links unless the matching SSH port is forwarded.
+- [ ] Cockpit Bookmarks page renders and detects both normal links and terminal launcher entries after sync.
+
 ## Optional terminal, notebook and desktop additions
 
 - [ ] Fish, btop and mc run as normal users, with the login shell unchanged.

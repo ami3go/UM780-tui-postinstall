@@ -3,6 +3,7 @@
   "host": "bare-metal",
   "components": ["base", "storage", "vulkan", "llama", "ollama", "webui", "models", "cockpit", "cockpit_ghsync", "cockpit_bookmarks", "filebrowser", "codeserver", "tailscale", "updates", "benchmarks", "fish", "btop", "mc"],
   "model": "qwen2.5-coder:7b",
+  "auto_bookmarks": true,
   "webui_bind": "127.0.0.1",
   "llama_model_path": "",
   "model_storage": "/var/lib/llm-stack/models",

@@ -13,6 +13,7 @@ import traceback
 from .core import CONF_DIR, STATE_DIR, Runner, SetupError, detect_target, is_root
 from .components import ALL, DESCRIPTIONS, INSTALLERS
 from . import health
+from .component_bookmarks_auto import auto_sync_bookmarks
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT = PROJECT_DIR / 'config.json'
@@ -97,6 +98,8 @@ def plan(cfg, chosen):
     print('Use SSH port forwards over LAN or Tailscale; do not expose unauthenticated Ollama API.')
     print('Ollama may require >1 GB release download; WebUI has large dependencies.')
     print('Qwen model download requires separate confirmation.')
+    print('Installed web apps and ttyd-backed tools can be added to Cockpit Bookmarks automatically.')
+    print('Bookmark links to localhost require browser-side SSH port forwards; no ports are opened.')
     print('Optional browser terminal and VNC/noVNC require manual activation; no WAN binds are configured.')
     print('Run with --health after setup. A llama-server service requires a local GGUF file.')
     print()
@@ -137,6 +140,17 @@ def execute(cfg, chosen, ui):
             if ui.accept or not ui.confirm(f'{name} failed. Continue with remaining independent modules?'):
                 save_status(status_path, status)
                 return 1
+        save_status(status_path, status)
+    if cfg.get('auto_bookmarks', True) and 'bookmark_sync' not in chosen:
+        # Non-fatal: an invalid/custom Cockpit Bookmarks JSON must never block
+        # successful installation of unrelated host components.
+        try:
+            auto_sync_bookmarks(runner, cfg, chosen)
+            status['results']['_bookmarks_autosync'] = 'OK or plugin not installed'
+        except Exception as exc:
+            runner.logger.exception('Automatic Cockpit Bookmarks merge failed')
+            status['results']['_bookmarks_autosync'] = 'WARNING: ' + str(exc)
+            print('WARNING: Bookmarks automatic update skipped: ' + str(exc))
         save_status(status_path, status)
     print('\nModule results:', json.dumps(status['results'], indent=2))
     print('\nHealth check:')

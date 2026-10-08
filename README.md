@@ -12,6 +12,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
 | [Architecture](docs/ARCHITECTURE.md) | Modules, state, systemd and data flows, design constraints |
 | [Operations](docs/OPERATIONS.md) | Start/stop, SSH/Tailscale forwarding, updates, backups, diagnostics |
+| [Automatic application bookmarks](docs/BOOKMARKS_AUTO.md) | Auto-add web apps and safe on-demand terminal cards into Cockpit Bookmarks |
 | [Optional server tools](docs/OPTIONAL_TOOLS.md) | Fish, btop, MC, ttyd, AoE, JupyterLab and on-demand VNC/noVNC |
 | [Cockpit extensions](docs/COCKPIT_PLUGINS.md) | GitHub Sync and Bookmarks setup, access, security, and updates |
 | [Security and storage](docs/SECURITY.md) | Threat model, disk safeguards, permissions, network exposure and trust |
@@ -67,8 +68,11 @@ sudo python3 install.py --health
 | `jupyterlab` | Authenticated, local-only notebook server, `127.0.0.1:8888` |
 | `vnc` | Optional TigerVNC virtual XFCE desktop, **not started**; password required |
 | `novnc` | Optional local noVNC proxy, **not started** until VNC is configured |
+| `bookmark_sync` | Rescan installed applications into Cockpit Bookmarks; automatic on successful apply by default |
 
 The default `config.json` selects the original core components plus Fish, btop and Midnight Commander. The five additional components (ttyd, Agent of Empires, JupyterLab, VNC and noVNC) start **unchecked**. The selected core components still include the optional Qwen model download module. Dependencies are not installed implicitly by per-component reruns. Only the `models` module prompts before pulling a model; `--yes` accepts that prompt as well as the initial apply prompt, so review the plan first.
+
+By default, each successful apply run also adds missing app cards to Cockpit Bookmarks if the plugin is installed. This does **not** start services or make localhost-bound ports accessible remotely; read [automatic bookmarks](docs/BOOKMARKS_AUTO.md) before relying on the links.
 
 ## Access model
 

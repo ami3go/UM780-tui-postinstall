@@ -31,6 +31,7 @@ The component registry in `llmsetup/components.py` imports functions from:
 
 - `component_base.py`: module list/description, base packages, storage, AMD Vulkan, llama.cpp.
 - `component_llms.py`: Ollama, uv/Python/Open WebUI, optional Qwen pull.
+- `component_bookmarks_auto.py`: post-apply plugin detection, installed service/CLI discovery, safe additive JSON merge, backup and concurrency check.
 - `component_optional_tools.py`: Fish/btop/MC APT packages; verified ttyd and AoE executables; non-root Jupyter; disabled VNC/noVNC systemd units.
 - `component_cockpit_plugins.py`: Pinned upstream GitHub Sync Cockpit plugin; digest-verified Bookmarks Debian plugin.
 - `component_addons.py`: Cockpit, FileBrowser Quantum, code-server, Tailscale, unattended security upgrades, benchmark prerequisites.
@@ -40,6 +41,8 @@ The component registry in `llmsetup/components.py` imports functions from:
 - `health.py`: systemd, localhost ports, Vulkan, mount and listener checks.
 
 Plugin installers require the loopback Cockpit socket override and use upstream releases; they have no independent always-on TCP service. See [Cockpit plugins](COCKPIT_PLUGINS.md).
+
+After an apply run, the optional Bookmarks post-hook detects installed apps and adds missing cards, without altering existing app entries or starting any services. The `bookmark_sync` module also allows an explicit rescan; see [Bookmarks auto-configuration](BOOKMARKS_AUTO.md).
 
 This is modular **at the function/registry level**, not a third-party plugin interface. New modules require code changes and tests.
 
