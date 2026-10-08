@@ -214,7 +214,15 @@ def agent_of_empires(r, cfg, ui):
             stream = tar.extractfile(candidates[0])
             if stream is None: raise SetupError('AoE executable unavailable in archive')
             with stream: _atomic_binary_from_stream(stream, AOE_DEST)
-    print('AoE installed at ' + str(AOE_DEST))
+    cli = Path('/usr/local/bin/aoe')
+    if cli.is_symlink():
+        if cli.resolve() != AOE_DEST.resolve():
+            raise SetupError('Existing aoe symlink belongs to another installation')
+    elif cli.exists():
+        raise SetupError('Existing /usr/local/bin/aoe is unmanaged')
+    else:
+        cli.symlink_to(AOE_DEST)
+    print('AoE installed at ' + str(AOE_DEST) + ' and linked as /usr/local/bin/aoe')
     print('Run as your normal Linux user; tmux sessions and agents remain user-owned.')
     print('Do not run AoE serve as root. No dashboard or Docker integration started.')
 
@@ -259,6 +267,7 @@ After=network.target
 Type=simple
 User=%i
 WorkingDirectory=~
+ExecStartPre=/usr/bin/test %i != root
 ExecStartPre=/usr/bin/test -s %h/.config/tigervnc/passwd
 ExecStart=/usr/bin/tigervncserver -fg :1 -localhost yes -SecurityTypes VncAuth -geometry 1600x900 -xstartup /usr/bin/startxfce4
 ExecStop=/usr/bin/tigervncserver -kill :1
