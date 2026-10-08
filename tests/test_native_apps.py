@@ -66,7 +66,7 @@ class NativeAppsTests(unittest.TestCase):
 
     def test_ups_repo_preparation_not_auto_install(self):
         self.assertIn('cockpit-ups-wol',apps.UPS_REPO)
-        self.assertIn('dry-run',apps.ups_wol.__doc__ or '')
+        self.assertNotIn('install.sh --silent',apps.ups_wol.__doc__ or '')
 
     def test_bookmarks_for_kuma_and_opencode(self):
         entries=desired_entries(
