@@ -69,6 +69,10 @@ tailscale ip -4
 
 After enrollment, substitute the machine's tailnet IP/hostname in the `ssh` command. The installer does not configure Tailscale Serve or Funnel; **do not enable Funnel for the Ollama API**. Do not use unauthenticated endpoints over raw LAN/WAN.
 
+## Automatic Cockpit Bookmarks entries
+
+By default, an apply run adds missing app cards to an installed Cockpit Bookmarks plugin. On-demand ttyd application cards are created only when their binaries are installed and require SSH-forwarded browser access; app web links are to the browser's `127.0.0.1` (not the server LAN IP). The operation preserves existing entries and writes a backup when it changes the JSON. Run `sudo python3 install.py --apply --component bookmark_sync` to rescan, or set `auto_bookmarks` to `false` to disable the post-hook. See [Bookmarks auto-configuration](BOOKMARKS_AUTO.md) for port forwarding, recovery and limitations.
+
 ## Optional terminal, notebook and desktop tools
 
 The `fish`, `btop` and `mc` packages are CLI-only. The optional `ttyd`, `agent_of_empires`, `jupyterlab`, `vnc` and `novnc` components are documented in [Optional Tools](OPTIONAL_TOOLS.md), including activation, manual password creation, disabled-by-default services, SSH port forwarding and rollback commands. VNC/noVNC should not be exposed beyond localhost; a Jupyter notebook is a remote code execution interface gated by its token and SSH.
