@@ -21,6 +21,7 @@ BIN_DIR = ROOT_DIR / 'bin'
 TTYD_TAG = '1.7.7'
 TTYD_BINARY = 'ttyd.x86_64'
 TTYD_DEST = BIN_DIR / 'ttyd'
+AOE_TAG = 'v1.17.2'
 AOE_ASSET = 'aoe-linux-amd64.tar.gz'
 AOE_DEST = BIN_DIR / 'aoe'
 VNC_UNIT = 'llm-vnc@.service'
@@ -201,7 +202,7 @@ def agent_of_empires(r, cfg, ui):
     ensure_dir(ROOT_DIR)
     ensure_dir(BIN_DIR)
     r.apt('tmux', 'git', 'ca-certificates')
-    artifact = _release_binary(r, 'agent-of-empires/agent-of-empires', AOE_ASSET, AOE_DEST)
+    artifact = _release_binary(r, 'agent-of-empires/agent-of-empires', AOE_ASSET, AOE_DEST, tag=AOE_TAG)
     if artifact != AOE_DEST:
         with tarfile.open(artifact, mode='r:gz') as tar:
             candidates = [m for m in tar.getmembers() if
