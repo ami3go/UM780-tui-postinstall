@@ -42,7 +42,7 @@ class UI:
     def checklist(self, selected):
         if shutil.which('whiptail') and sys.stdin.isatty():
             args = ['whiptail', '--title', 'Debian 13 LLM Server Setup',
-                    '--checklist', 'Choose modules (SPACE toggles)', '23', '100', '13']
+                    '--checklist', 'Choose modules (SPACE toggles)', '23', '96', '14']
             for component in ALL:
                 args += [component, DESCRIPTIONS[component], 'ON' if component in selected else 'OFF']
             p = subprocess.run(args, stderr=subprocess.PIPE, text=True)
@@ -97,6 +97,7 @@ def plan(cfg, chosen):
     print('Use SSH port forwards over LAN or Tailscale; do not expose unauthenticated Ollama API.')
     print('Ollama may require >1 GB release download; WebUI has large dependencies.')
     print('Qwen model download requires separate confirmation.')
+    print('Optional browser terminal and VNC/noVNC require manual activation; no WAN binds are configured.')
     print('Run with --health after setup. A llama-server service requires a local GGUF file.')
     print()
 
