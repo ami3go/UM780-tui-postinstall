@@ -13,7 +13,8 @@ from .core import (CONF_DIR, OWNER_MARK, ROOT_DIR, STATE_DIR, SetupError,
 from .storage import configure_storage
 
 ALL = ['base', 'storage', 'vulkan', 'llama', 'ollama', 'webui', 'models',
-       'cockpit', 'cockpit_ghsync', 'cockpit_bookmarks', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks']
+       'cockpit', 'cockpit_ghsync', 'cockpit_bookmarks', 'filebrowser', 'codeserver', 'tailscale', 'updates', 'benchmarks',
+       'fish', 'btop', 'mc', 'ttyd', 'agent_of_empires', 'jupyterlab', 'vnc', 'novnc']
 DESCRIPTIONS = {
  'base': 'System utilities, SSH and prerequisite packages',
  'storage': 'Optional existing second-SSD mount (typed UUID approval)',
@@ -29,7 +30,15 @@ DESCRIPTIONS = {
  'codeserver': 'code-server native Debian package, localhost, password',
  'tailscale': 'Official signed Tailscale Debian 13 repository; login manual',
  'updates': 'Automated Debian security updates (no auto reboot)',
- 'benchmarks': 'Diagnostics and benchmark prerequisites'
+ 'benchmarks': 'Diagnostics and benchmark prerequisites',
+ 'fish': 'Fish interactive shell (does not change login shell)',
+ 'btop': 'btop CPU, RAM and process monitor',
+ 'mc': 'Midnight Commander file manager',
+ 'ttyd': 'Optional browser terminal (local-only, disabled initially)',
+ 'agent_of_empires': 'Agent of Empires tmux coding-agent manager (no daemon)',
+ 'jupyterlab': 'Local-only token-authenticated JupyterLab workspace',
+ 'vnc': 'Virtual XFCE desktop via TigerVNC (manual activation)',
+ 'novnc': 'Browser VNC proxy (manual activation after VNC)'
 }
 
 
