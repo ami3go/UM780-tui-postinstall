@@ -40,7 +40,7 @@ WEB_APPS = (
     ('jupyterlab', 'JupyterLab', 8888, 'http://127.0.0.1:8888/lab', '🧪',
      '/etc/systemd/system/llm-jupyterlab.service', 'Token-authenticated Python notebooks'),
     ('novnc', 'noVNC Desktop', 6080, 'http://127.0.0.1:6080/vnc.html', '🖥️',
-     '/etc/systemd/system/llm-novnc.service', 'Activate VNC and noVNC first'),
+     '/etc/systemd/system/llm-novnc.service', 'Virtual XFCE desktop with generated VNC password; retrieve with sudo cat /etc/llm-postinstall/novnc-vnc-password on the server'),
 )
 
 # These become real Cockpit Bookmarks "Applications" entries with the existing
