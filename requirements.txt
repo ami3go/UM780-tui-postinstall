@@ -1,1 +1,7 @@
-# Installer requires only Python >=3.11 standard library; no third-party Python packages.
+# Python requirements for the installer itself: none (Python >=3.11 standard library).
+# Debian 13 / bare-metal prerequisites and system packages are provisioned separately.
+# Open WebUI is installed into its own uv environment by the webui module; this
+# repository does not pin the Open WebUI transitive dependencies in this file.
+# Do not assume 'pip install -r requirements.txt' sets up the LLM server.
+# Start with: python3 install.py --plan
+# See docs/INSTALLATION.md, docs/CONFIGURATION.md and docs/KNOWN_ISSUES.md.
