@@ -7,6 +7,7 @@ mounting. No files are written, services started, or secrets printed.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import glob
 import json
 from pathlib import Path
 import shutil
@@ -26,6 +27,8 @@ ACTIONS = {'preflight', 'config_snapshot', 'models', 'benchmarks',
 # Presence evidence. Multiple checks for a module are ALL required unless
 # declared via a glob / alternate selector. Package evidence is local dpkg only.
 INSTALL = {
+    'preflight': ('file:/var/log/llm-postinstall/preflight.txt',),
+    'config_snapshot': ('glob:/var/backups/llm-postinstall/snapshots/um780-config-*.tar.gz',),
     'base': ('bin:git', 'bin:python3', 'package:openssh-server'),
     'storage': ('dir:/var/lib/llm-stack/models|/srv/llm-data/models',),
     'vulkan': ('package:mesa-vulkan-drivers', 'bin:vulkaninfo'),
@@ -161,7 +164,7 @@ class LocalProbe:
 
     def match(self, pattern):
         p = Path(pattern)
-        return any(x.is_file() for x in p.parent.glob(p.name))
+        return any(Path(x).is_file() for x in glob.glob(pattern))
 
     def package(self, name):
         if name not in self._packages:
