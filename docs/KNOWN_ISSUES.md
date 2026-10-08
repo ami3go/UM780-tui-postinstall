@@ -28,6 +28,12 @@ Reviewed against `main` source on **2026-10-08**. This is a transparent engineer
 | CI-01 | **MEDIUM** | Test coverage | CI compiles Python, runs mocked unittests and a plan command on Ubuntu, not Debian systemd on UM780 Pro. | Debian test VM/container where practical; supervised real-machine CI gate for hardware functions |
 | PERF-01 | **LOW** | Benchmark terminology | `benchmarks` writes CPU/sysbench and Vulkan summaries, not tokens/sec benchmarks. | Separate model benchmark command/evidence and performance thresholds |
 
+## Read-only software inventory limitations
+
+- **MEDIUM (INV-01):** The new installed/configured inventory is file/package/config evidence, not a full functional test. Authentication, AMD offload, real model inference, disk UUID backing, restore success and version drift remain outside its scope. Run `--health` and the physical acceptance suite separately.
+- **MEDIUM (INV-02):** A non-root operator may be unable to read root-owned configuration. Unavailable local Ollama API state is reported UNVERIFIED, and user-owned agent/VNC authentication is never guessed. Prefer a privileged **read-only** inventory run for accurate private configuration evidence.
+- **MEDIUM (INV-03):** Existing managed units and configuration files can be stale, and a configured flag does not prove an endpoint is safe to publish. Configured-only state can indicate orphaned setup. The installer does not skip/rerun components automatically based on detection.
+
 ## Optional safety / status limitations
 
 - `preflight` checks model root and basic disk space, but does not solve all complex SSD topology, mounted UUID identity or interface listener risks already documented above.

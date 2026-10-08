@@ -31,7 +31,7 @@ The canonical component order is defined in `llmsetup/install_stages.py` and dri
 | 4 | Remote access and virtual desktop | `tailscale`, `secure_ingress`, `vnc`, `novnc` |
 | 5 | Monitoring, backups and automation | `backup_restore`, `service_watchdog`, `uptime_kuma`, `ups_wol`, `bookmark_sync` |
 
-The 18 default-selected components in `config.json` remain unchanged. The other 21 modules are **unchecked** and are not selected by `--stage N`; select them individually with `--component` or in the staged TUI.
+The 18 default-selected components in `config.json` remain unchanged. Before installation use `--inventory` to inspect actual package/binary presence separately from managed configuration; `--inventory --stage N` includes all software in that stage regardless of whether it was selected by default. For precise rules and limitations see [Inventory](INSTALL_INVENTORY.md). The other 21 modules are **unchecked** and are not selected by `--stage N`; select them individually with `--component` or in the staged TUI.
 
 `--stage 1` is the suggested starting point for the first controlled deployment, followed by steps 2–5. Step 5 currently has no default-selected modules. `--stage` is repeatable and can be used with `--plan`, `--health`, or `--apply`. The two selectors `--stage` and `--component` cannot be combined in one command. For a mixed custom selection use the interactive TUI.
 
@@ -47,6 +47,8 @@ The 18 default-selected components in `config.json` remain unchanged. The other 
 | `--health` | Read-only service, Vulkan, mount and port checks (details in [Operations](OPERATIONS.md)) |
 | `--apply` | Skip module checklist and run chosen modules; root required |
 | `--component NAME` | Select one module; repeat flag for additional modules; runs in canonical priority order |
+| `--inventory` | Read-only local installed/configured/running scan; all 39 modules by default, or filter by `--stage`/`--component` |
+| `--json` | Machine-readable output only with `--inventory`; no passwords or tokens included |
 | `--stage N` | Select only default-enabled software in stage N (1–5); repeatable; cannot combine with `--component` |
 | `--list-stages` | Print all five categories, default/optional status and software descriptions; read-only |
 | `--yes` | Accept ordinary confirmation prompts including model downloads; **still must type UUID** if mounting |
@@ -56,6 +58,8 @@ The 18 default-selected components in `config.json` remain unchanged. The other 
 Examples:
 
 ```sh
+python3 install.py --inventory
+python3 install.py --inventory --json
 python3 install.py --list-stages
 python3 install.py --plan --stage 1
 python3 install.py --plan

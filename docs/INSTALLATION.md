@@ -179,3 +179,8 @@ Start with [Known issues](KNOWN_ISSUES.md), then [Operations](OPERATIONS.md). Lo
 ## Priority-based installation
 
 New installers should use the five-step plan: foundation/data safety, AI runtime, administration/development, remote access, then monitoring/recovery. The TUI displays one selection page per category. For controlled steps run `python3 install.py --list-stages`, then `python3 install.py --plan --stage 1` and `sudo python3 install.py --apply --stage 1` before proceeding to stage 2. Each `--stage` command selects only already-enabled defaults; unchecked modules require the TUI or `--component`. The exact order, manual setup and acceptance gates are in [Installation stages](INSTALL_STAGES.md).
+
+
+## Detect existing installed/configured software
+
+Before choosing modules, run `python3 install.py --inventory` to scan all 39 components without modifying the machine. Results distinguish missing binaries, installed-but-unconfigured software, left-behind configuration without binaries, configured installations, and unverifiable per-user setup. Use `--inventory --stage N` to inspect a single category, including unchecked modules. The TUI and `--plan` annotate selected items with inventory state; successful `--apply` runs persist each component's post-install observation in `last-run.json`. It never silently skips a selected installer. Read [inventory verification](INSTALL_INVENTORY.md) for limits and safe usage.
