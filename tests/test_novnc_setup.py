@@ -72,6 +72,45 @@ class PasswordTests(unittest.TestCase):
             self.assertEqual(stat.S_IMODE(file.stat().st_mode),0o600)
 
 
+    def test_provisioning_reuses_credentials_and_does_not_rotate_on_rerun(self):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t)
+            home = root / 'llmvnc'
+            home.mkdir()
+            clear = root / 'etc' / 'secret'
+            binary = home / '.config/tigervnc/passwd'
+            owner = mock.Mock(pw_uid=os.getuid(), pw_gid=os.getgid())
+            def secure_directory(p, *_):
+                p=Path(p)
+                p.mkdir(parents=True, exist_ok=True)
+                p.chmod(0o700)
+            def exclusive_file(p, content, *_):
+                p=Path(p)
+                p.parent.mkdir(parents=True, exist_ok=True)
+                with open(p, 'xb') as stream:
+                    stream.write(content)
+                p.chmod(0o600)
+            with mock.patch.object(n,'VNC_HOME',home), \\
+                 mock.patch.object(n,'CLEAR_PASS_FILE',clear), \\
+                 mock.patch.object(n,'VNC_PASS_FILE',binary), \\
+                 mock.patch.object(n,'CONF_DIR',clear.parent), \\
+                 mock.patch.object(n,'_ensure_service_identity',return_value=owner), \\
+                 mock.patch.object(n,'_secure_dir',side_effect=secure_directory), \\
+                 mock.patch.object(n,'_private_file'), \\
+                 mock.patch.object(n,'_exclusive_binary',side_effect=exclusive_file), \\
+                 mock.patch.object(n,'generate_vnc_password',return_value='ABCD2345') as make, \\
+                 mock.patch.object(n,'encode_vnc_password',return_value=b'12345678') as encoder:
+                first=n.provision_credentials(None)
+                self.assertEqual(first,clear)
+                self.assertEqual(clear.read_text(),'ABCD2345\\n')
+                self.assertEqual(binary.read_bytes(),b'12345678')
+                second=n.provision_credentials(None)
+                self.assertEqual(second,clear)
+                self.assertEqual(make.call_count,1)
+                self.assertEqual(encoder.call_count,2)
+                self.assertEqual(clear.read_text(),'ABCD2345\\n')
+
+
 class SetupTests(unittest.TestCase):
     def setUp(self):
         self.r=mock.Mock()
