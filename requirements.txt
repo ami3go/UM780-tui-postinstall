@@ -1,0 +1,1 @@
+# Installer requires only Python >=3.11 standard library; no third-party Python packages.
