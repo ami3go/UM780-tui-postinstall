@@ -103,6 +103,8 @@ sudo python3 install.py --apply --component webui
 sudo python3 install.py --apply --component cockpit
 sudo python3 install.py --apply --component cockpit_ghsync
 sudo python3 install.py --apply --component cockpit_bookmarks
+# Optional explicit rescan of installed application bookmark cards:
+sudo python3 install.py --apply --component bookmark_sync
 sudo python3 install.py --apply --component filebrowser
 sudo python3 install.py --apply --component codeserver
 sudo python3 install.py --apply --component tailscale
@@ -116,6 +118,8 @@ sudo python3 install.py --apply --component agent_of_empires
 sudo python3 install.py --apply --component jupyterlab
 sudo python3 install.py --apply --component vnc --component novnc
 ```
+
+Successful module installs automatically append detected app entries to Cockpit Bookmarks when the plugin exists and `auto_bookmarks` is enabled. Each local-only web app link requires SSH port forwarding on the browser machine; on-demand terminal cards need ttyd installed. See [Bookmarks auto-configuration](BOOKMARKS_AUTO.md).
 
 The higher-exposure tools ttyd, Agent of Empires, JupyterLab, VNC and noVNC are not preselected in `config.json`. The VNC and ttyd/noVNC services are not enabled automatically. Read [Optional Tools](OPTIONAL_TOOLS.md) before activation.
 
