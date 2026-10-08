@@ -77,6 +77,16 @@ class StageRegistryTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 get_stage(value)
 
+    def test_optional_snapshot_skips_clean_first_install(self):
+        from llmsetup import component_safety
+        out=io.StringIO()
+        with mock.patch.object(component_safety,'_collect_snapshot_paths',return_value=[]), \
+             mock.patch.object(component_safety,'build_snapshot') as create, \
+             redirect_stdout(out):
+            component_safety.config_snapshot(mock.Mock(),{},None)
+        create.assert_not_called()
+        self.assertIn('No pre-existing managed configuration',out.getvalue())
+
     def test_setup_notes_cover_critical_manual_actions(self):
         for component in ['storage','models','cockpit_ghsync','tailscale',
                           'novnc','backup_restore','ups_wol','uptime_kuma']:
