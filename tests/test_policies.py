@@ -90,6 +90,21 @@ class TestPersistentStorage(unittest.TestCase):
             with mock.patch('llmsetup.cli.CONF_DIR', etc):
                 self.assertEqual(load_config(config)['model_storage'], '/srv/llm-data/models')
 
+    @unittest.skipIf(os.geteuid() == 0, 'root bypasses directory permissions')
+    def test_unreadable_root_only_conf_dir_falls_back_for_non_root(self):
+        with tempfile.TemporaryDirectory() as t:
+            config = Path(t)/'config.json'
+            config.write_text(json.dumps({'target_os':'debian-13','host':'bare-metal',
+                'components':['ollama'],'model_storage':'/var/lib/llm-stack/models'}))
+            etc = Path(t)/'etc'; etc.mkdir()
+            (etc/'storage.json').write_text(json.dumps({'model_storage':'/srv/llm-data/models'}))
+            etc.chmod(0o000)
+            try:
+                with mock.patch('llmsetup.cli.CONF_DIR', etc):
+                    self.assertEqual(load_config(config)['model_storage'], '/var/lib/llm-stack/models')
+            finally:
+                etc.chmod(0o700)
+
     def test_persisted_storage_rejects_unmanaged_path(self):
         with tempfile.TemporaryDirectory() as t:
             config = Path(t)/'config.json'
