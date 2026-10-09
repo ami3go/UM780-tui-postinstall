@@ -153,5 +153,20 @@ class SetupTests(unittest.TestCase):
         self.assertEqual(self.r.run.call_count,2)
 
 
+class SecureDirTests(unittest.TestCase):
+    def test_own_directory_with_loose_mode_is_tightened(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'conf'
+            path.mkdir(mode=0o755)
+            os.chmod(path, 0o755)
+            n._secure_dir(path, os.getuid(), os.getgid())
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o700)
+
+    def test_foreign_owner_is_still_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(SetupError):
+                n._secure_dir(tmp, os.getuid() + 1, os.getgid())
+
+
 if __name__=='__main__':
     unittest.main()

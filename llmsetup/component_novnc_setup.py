@@ -69,6 +69,12 @@ def _secure_dir(path, uid, gid):
         os.chown(path, uid, gid)
         os.chmod(path, 0o700)
     info = path.stat()
+    # Another module may have created it with a looser default mode first;
+    # tightening a directory we already own never weakens security.
+    if (stat.S_ISDIR(info.st_mode) and info.st_uid == uid and info.st_gid == gid
+            and stat.S_IMODE(info.st_mode) & 0o077 and not stat.S_IMODE(info.st_mode) & 0o7000):
+        os.chmod(path, 0o700)
+        info = path.stat()
     if (not stat.S_ISDIR(info.st_mode) or info.st_uid != uid
             or info.st_gid != gid or stat.S_IMODE(info.st_mode) != 0o700):
         raise SetupError('VNC credential directory has unexpected ownership/permissions')

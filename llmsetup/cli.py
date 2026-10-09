@@ -109,7 +109,13 @@ def load_config(path):
         raise SetupError('components must be an array')
     # Preserve the authorized storage decision across single-module reruns.
     persisted = CONF_DIR / 'storage.json'
-    if persisted.is_file() and not persisted.is_symlink():
+    try:
+        has_persisted = persisted.is_file() and not persisted.is_symlink()
+    except PermissionError:
+        # CONF_DIR is root-only (0700); non-root read-only runs such as
+        # --plan and --inventory fall back to the configured model root.
+        has_persisted = False
+    if has_persisted:
         saved_root = json.loads(persisted.read_text()).get('model_storage')
         if saved_root in ('/srv/llm-data/models', '/var/lib/llm-stack/models'):
             data['model_storage'] = saved_root
