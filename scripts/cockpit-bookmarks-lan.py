@@ -15,6 +15,12 @@ result survives installer reruns.
 --host writes a fixed address instead of {host}; re-running with a different
 --host (or none) rewrites the installer-managed cards again.
 
+--novnc-password puts the root-only noVNC password into the noVNC card's URL
+fragment (#autoconnect=1&password=...), so the desktop opens without a
+prompt; the fragment is never sent to the server. The Bookmarks config is
+world-readable, so any local account can then read that password.
+--no-novnc-password removes it again.
+
 --remove-samples also drops the plugin's sample cards (Grafana, Example
 Service, Discovered Example); the sample "Grafana" points at :3000, which is
 Open WebUI on this server.
@@ -27,6 +33,7 @@ import json
 import os
 from pathlib import Path
 import re
+import urllib.parse
 import shutil
 import sys
 import tempfile
@@ -34,6 +41,7 @@ import tempfile
 CONFIG = Path('/etc/cockpit/cockpit-bookmarks.json')
 GROUP = 'UM780 Web Apps'
 MANAGED_BY = 'um780-postinstall'
+NOVNC_PASSWORD_FILE = Path('/etc/llm-postinstall/novnc-vnc-password')
 SAMPLES = ('Grafana', 'Example Service', 'Discovered Example')
 
 DESCRIPTIONS = {
@@ -58,7 +66,7 @@ HOST_RE = re.compile(r'^(https?://)[^/:]+(:\d+)')
 HOST_OK = re.compile(r'^(\{host\}|[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\])$')
 
 
-def transform(config, remove_samples=False, host='{host}'):
+def transform(config, remove_samples=False, host='{host}', novnc_password=None):
     services = []
     for card in config.get('services', []):
         if (remove_samples and card.get('name') in SAMPLES
@@ -71,6 +79,10 @@ def transform(config, remove_samples=False, host='{host}'):
                         tags=tags if 'lan' in tags else tags + ['lan'])
             if card.get('id') in DESCRIPTIONS:
                 card['description'] = DESCRIPTIONS[card['id']]
+            if card.get('id') == 'um780-novnc' and novnc_password is not None:
+                base = card['url'].split('#', 1)[0]
+                card['url'] = (base + '#autoconnect=1&resize=remote&password='
+                               + urllib.parse.quote(novnc_password, safe='')) if novnc_password else base
         services.append(card)
     ids = {c.get('id') for c in services}
     for extra in EXTRA_CARDS:
@@ -109,6 +121,8 @@ def main(argv=None):
     parser.add_argument('--remove-samples', action='store_true', help="drop the plugin's sample cards")
     parser.add_argument('--host', default='{host}',
                         help='address for card links (default: {host}, the address used to open Cockpit)')
+    parser.add_argument('--novnc-password', action=argparse.BooleanOptionalAction, default=None,
+                        help='embed (or with --no-novnc-password remove) the noVNC password in its card URL')
     args = parser.parse_args(argv)
     if not HOST_OK.match(args.host):
         sys.exit('Invalid --host: use a hostname, IPv4 address, [IPv6] address or {host}')
@@ -116,9 +130,18 @@ def main(argv=None):
     config = json.loads(args.config.read_text(encoding='utf-8'))
     if not isinstance(config.get('services'), list):
         sys.exit('Unexpected Cockpit Bookmarks format; nothing changed')
-    result = transform(config, args.remove_samples, args.host)
+    novnc_password = None
+    if args.novnc_password:
+        try:
+            novnc_password = NOVNC_PASSWORD_FILE.read_text(encoding='ascii').strip()
+        except OSError as exc:
+            sys.exit(f'Cannot read {NOVNC_PASSWORD_FILE} ({exc.strerror}); run with sudo')
+    elif args.novnc_password is False:
+        novnc_password = ''
+    result = transform(config, args.remove_samples, args.host, novnc_password)
     for card in result['services']:
-        print(f"{card.get('name', '?'):22} {card.get('url', '')}")
+        url = re.sub(r'password=[^&]*', 'password=***', str(card.get('url', '')))
+        print(f"{card.get('name', '?'):22} {url}")
     if result == config:
         print('Already up to date; nothing to change.')
     elif args.apply:

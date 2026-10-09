@@ -27,6 +27,26 @@ The `ExecStart` overrides copy the installer's current command line and change o
 
 No firewall rules are added. If you run one, allow the ports above from your LAN.
 
+## Optional: no logins (`nologin on|off`)
+
+```sh
+sudo sh scripts/lan-access.sh nologin on    # also enables LAN access
+sudo sh scripts/lan-access.sh nologin off   # logins back on, LAN access stays
+```
+
+| App | No-login mechanism |
+| --- | --- |
+| Open WebUI | `WEBUI_AUTH=False` via `/etc/llm-postinstall/lan-webui.env`. With existing users, Open WebUI signs every visitor in as `admin@localhost` (password `admin`, role admin); `scripts/webui-lan-user.py` creates that account through the API using the installer's bootstrap admin. Chats made in no-login mode belong to that account, not to `admin@llm.local`. |
+| code-server | `--auth none` |
+| FileBrowser | `auth.methods.noauth: true` and password login disabled in the runtime config copy |
+| noVNC | Not a login: use `cockpit-bookmarks-lan.py --novnc-password` to put the VNC password in the card URL |
+| Ollama | Has no login |
+| Cockpit | Always requires a system login; let the browser save it |
+
+`nologin off` and `disable` give `admin@localhost` a random password, because with logins back on the fixed `admin` password would let anyone sign in as an administrator. If you changed the `admin@llm.local` password, put the current one in `/etc/llm-postinstall/webui-admin-password` first.
+
+> With no logins, anyone on the LAN gets an Open WebUI admin account, a shell as the `codeserver` user through code-server's terminal, and read/write access to model files.
+
 ## Bookmarks for LAN clients: `scripts/cockpit-bookmarks-lan.py`
 
 The installer's Cockpit Bookmarks cards link to `127.0.0.1`, which only works through a tunnel. This script switches installer-managed cards to the `{host}` placeholder (the address the browser used to open Cockpit), drops their SSH-tunnel notes, and adds **Cockpit** and **Ollama API** cards.
@@ -37,6 +57,8 @@ sudo python3 scripts/cockpit-bookmarks-lan.py --apply                     # writ
 sudo python3 scripts/cockpit-bookmarks-lan.py --apply --remove-samples    # also drop the plugin's sample cards
 sudo python3 scripts/cockpit-bookmarks-lan.py --apply --host 192.168.1.50   # fixed server address instead of {host}
 ```
+
+`--novnc-password` (needs sudo) adds `#autoconnect=1&resize=remote&password=…` to the noVNC card so the desktop opens without a prompt. The fragment is not sent to the server, but `/etc/cockpit/cockpit-bookmarks.json` is world-readable, so local accounts can read it; `--no-novnc-password` removes it.
 
 `{host}` follows whatever address the browser used to open Cockpit. Use `--host` with the server's LAN IP or hostname for fixed links; running again with another `--host` (or none) rewrites the installer-managed cards.
 
