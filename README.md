@@ -25,6 +25,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | [Known issues](docs/KNOWN_ISSUES.md) | Implementation gaps and unverified integration assumptions |
 | [Development and testing](docs/DEVELOPMENT.md) | Test suite, CI scope, contribution and documentation rules |
 | [Acceptance checklist](docs/ACCEPTANCE.md) | Evidence required before first production deployment |
+| [Optional LAN access](docs/LAN_ACCESS.md) | Opt-in scripts to serve all web apps and Bookmarks cards on a trusted LAN |
 
 ## Quick start
 
@@ -111,6 +112,8 @@ ssh -N -L 3000:127.0.0.1:3000 -L 11434:127.0.0.1:11434 \
 ```
 
 Browse `http://127.0.0.1:3000` (Open WebUI) or `https://127.0.0.1:9090` (Cockpit; inspect browser certificate warning). **Do not expose Ollama's unauthenticated API** to untrusted networks. Tailscale `up` and any Tailscale Serve setup are manual.
+
+On a trusted LAN you can instead opt in to direct access with `scripts/lan-access.sh`; see [Optional LAN access](docs/LAN_ACCESS.md).
 
 ## Data protection and integrity
 
