@@ -10,6 +10,10 @@ result survives installer reruns.
     python3 scripts/cockpit-bookmarks-lan.py                 # preview only
     sudo python3 scripts/cockpit-bookmarks-lan.py --apply    # write (with backup)
     sudo python3 scripts/cockpit-bookmarks-lan.py --apply --remove-samples
+    sudo python3 scripts/cockpit-bookmarks-lan.py --apply --host 192.168.31.55
+
+--host writes a fixed address instead of {host}; re-running with a different
+--host (or none) rewrites the installer-managed cards again.
 
 --remove-samples also drops the plugin's sample cards (Grafana, Example
 Service, Discovered Example); the sample "Grafana" points at :3000, which is
@@ -22,6 +26,7 @@ import datetime
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import sys
 import tempfile
@@ -49,22 +54,29 @@ EXTRA_CARDS = [
 ]
 
 
-def transform(config, remove_samples=False):
+HOST_RE = re.compile(r'^(https?://)[^/:]+(:\d+)')
+HOST_OK = re.compile(r'^(\{host\}|[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\])$')
+
+
+def transform(config, remove_samples=False, host='{host}'):
     services = []
     for card in config.get('services', []):
         if (remove_samples and card.get('name') in SAMPLES
                 and 'um780ManagedBy' not in card):
             continue
-        if card.get('um780ManagedBy') == MANAGED_BY and str(card.get('url', '')).startswith('http://127.0.0.1:'):
-            card = dict(card, url=card['url'].replace('http://127.0.0.1:', 'http://{host}:', 1),
-                        tags=[t for t in card.get('tags', []) if t != 'ssh-tunnel'] + ['lan'])
+        url = str(card.get('url', ''))
+        if card.get('um780ManagedBy') == MANAGED_BY and HOST_RE.match(url):
+            tags = [t for t in card.get('tags', []) if t != 'ssh-tunnel']
+            card = dict(card, url=HOST_RE.sub(lambda m: m.group(1) + host + m.group(2), url, count=1),
+                        tags=tags if 'lan' in tags else tags + ['lan'])
             if card.get('id') in DESCRIPTIONS:
                 card['description'] = DESCRIPTIONS[card['id']]
         services.append(card)
     ids = {c.get('id') for c in services}
     for extra in EXTRA_CARDS:
         if extra['id'] not in ids:
-            services.append({**extra, 'um780ManagedBy': MANAGED_BY, 'group': GROUP,
+            services.append({**extra, 'url': extra['url'].replace('{host}', host),
+                             'um780ManagedBy': MANAGED_BY, 'group': GROUP,
                              'tags': ['um780', 'lan'], 'statusCheck': False})
     groups = [g for g in config.get('groupOrder', []) if g != GROUP]
     if remove_samples:
@@ -95,12 +107,16 @@ def main(argv=None):
     parser.add_argument('--config', type=Path, default=CONFIG)
     parser.add_argument('--apply', action='store_true', help='write changes (default: preview)')
     parser.add_argument('--remove-samples', action='store_true', help="drop the plugin's sample cards")
+    parser.add_argument('--host', default='{host}',
+                        help='address for card links (default: {host}, the address used to open Cockpit)')
     args = parser.parse_args(argv)
+    if not HOST_OK.match(args.host):
+        sys.exit('Invalid --host: use a hostname, IPv4 address, [IPv6] address or {host}')
 
     config = json.loads(args.config.read_text(encoding='utf-8'))
     if not isinstance(config.get('services'), list):
         sys.exit('Unexpected Cockpit Bookmarks format; nothing changed')
-    result = transform(config, args.remove_samples)
+    result = transform(config, args.remove_samples, args.host)
     for card in result['services']:
         print(f"{card.get('name', '?'):22} {card.get('url', '')}")
     if result == config:

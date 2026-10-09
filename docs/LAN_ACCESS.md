@@ -35,7 +35,10 @@ The installer's Cockpit Bookmarks cards link to `127.0.0.1`, which only works th
 python3 scripts/cockpit-bookmarks-lan.py                                  # preview
 sudo python3 scripts/cockpit-bookmarks-lan.py --apply                     # write, with timestamped .bak
 sudo python3 scripts/cockpit-bookmarks-lan.py --apply --remove-samples    # also drop the plugin's sample cards
+sudo python3 scripts/cockpit-bookmarks-lan.py --apply --host 192.168.1.50   # fixed server address instead of {host}
 ```
+
+`{host}` follows whatever address the browser used to open Cockpit. Use `--host` with the server's LAN IP or hostname for fixed links; running again with another `--host` (or none) rewrites the installer-managed cards.
 
 Re-running is safe; an unchanged config is not rewritten. Cards you added yourself are never modified. The installer's bookmark auto-sync only adds missing cards, so the result survives installer reruns; cards it adds later will again use `127.0.0.1` until you rerun the script.
 
