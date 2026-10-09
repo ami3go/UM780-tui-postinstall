@@ -69,7 +69,7 @@ def github_asset(r: Runner, repo: str, asset_name: str, *, version=None):
     raise SetupError(f'{asset_name} missing from {repo} release {data.get("tag_name")}')
 
 
-def install_release_asset(r, repo, asset_name, dest, *, version=None):
+def install_release_asset(r, repo, asset_name, *, version=None):
     tag, url, digest = github_asset(r, repo, asset_name, version=version)
     out = r.download(url, digest, Path('/var/cache/llm-postinstall') / (tag + '-' + asset_name))
     return tag, out
