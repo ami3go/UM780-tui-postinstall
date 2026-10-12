@@ -30,9 +30,19 @@ class OpenHandsTests(unittest.TestCase):
 
     def test_gateway_validation(self):
         self.assertEqual(oh.docker_gateway('172.17.0.1\n'), '172.17.0.1')
-        for value in ('', '127.0.0.1', '8.8.8.8', '::1', 'oops'):
+        for value in ('', '0.0.0.0', '169.254.1.1', '127.0.0.1', '8.8.8.8', '::1', 'oops'):
             with self.assertRaises(SetupError):
                 oh.docker_gateway(value)
+
+    def test_installed_port_only_from_managed_unit(self):
+        with mock.patch.object(oh.Path, 'is_symlink', return_value=False), \
+             mock.patch.object(oh.Path, 'is_file', return_value=True), \
+             mock.patch.object(oh.Path, 'read_text', return_value='# Managed by debian-llm-postinstall\nExecStart=docker run -p 127.0.0.1:3333:3000 --name x'):
+            self.assertEqual(oh.installed_port(), 3333)
+        with mock.patch.object(oh.Path, 'is_symlink', return_value=False), \
+             mock.patch.object(oh.Path, 'is_file', return_value=True), \
+             mock.patch.object(oh.Path, 'read_text', return_value='unmanaged\nExecStart=docker run -p 127.0.0.1:3333:3000 --name x'):
+            self.assertEqual(oh.installed_port(), 3002)
 
     def test_declining_consent_never_installs_or_runs_docker(self):
         r = mock.Mock()

@@ -45,9 +45,28 @@ def docker_gateway(raw):
         gateway = ipaddress.ip_address(value)
     except ValueError as exc:
         raise SetupError('Could not determine Docker default bridge gateway') from exc
-    if not isinstance(gateway, ipaddress.IPv4Address) or not gateway.is_private or gateway.is_loopback:
+    if not isinstance(gateway, ipaddress.IPv4Address) or not gateway.is_private or gateway.is_loopback or gateway.is_unspecified or gateway.is_link_local or gateway.is_multicast or gateway.is_reserved:
         raise SetupError('Docker bridge gateway must be a private non-loopback IPv4 address')
     return str(gateway)
+
+
+def installed_port():
+    """Read the installed managed systemd mapping for diagnostics/bookmarks."""
+    path = Path('/etc/systemd/system') / UNIT
+    try:
+        if path.is_symlink() or not path.is_file():
+            return 3002
+        raw = path.read_text(encoding='utf-8')
+        if not raw.startswith('# Managed by debian-llm-postinstall'):
+            return 3002
+        matches = re.findall(r' -p 127\.0\.0\.1:(\d{4,5}):3000(?: |$)', raw)
+        if len(matches) == 1:
+            port = int(matches[0])
+            if 1024 <= port <= 65535:
+                return port
+    except (OSError, UnicodeError, ValueError):
+        pass
+    return 3002
 
 
 def _already_owned_unit():
@@ -112,7 +131,9 @@ WantedBy=multi-user.target""")
 
 def _stop_managed_bridge_if_disabled(r):
     path = Path('/etc/systemd/system') / BRIDGE_UNIT
-    if path.is_file() and not path.is_symlink():
+    if path.is_symlink():
+        raise SetupError('Refusing symlinked Ollama bridge unit')
+    if path.is_file():
         if not path.read_text().startswith('# Managed by debian-llm-postinstall'):
             raise SetupError('Existing Ollama bridge unit is unmanaged')
         r.service(BRIDGE_UNIT, enable=False)

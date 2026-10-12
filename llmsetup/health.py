@@ -7,6 +7,7 @@ import socket
 import subprocess
 import urllib.request
 from .core import detect_target
+from .component_openhands import installed_port
 
 MANAGEMENT_PORTS = (11434, 8081, 3000, 3001, 8082, 8443, 9090, 7681, 8888, 5901, 5902, 6080, 3002, 11435)
 
@@ -96,7 +97,7 @@ def diagnostics(components=None):
         else:
             status = 'PASS' if ok and enabled else 'WARN'
         result.append((status, component, f'{service}: active={ok}, enabled={enabled}'))
-    for comp, port in [('openhands', 3002), ('ollama', 11434), ('webui', 3000), ('codeserver', 8443), ('filebrowser', 8082)]:
+    for comp, port in [('openhands', installed_port()), ('ollama', 11434), ('webui', 3000), ('codeserver', 8443), ('filebrowser', 8082)]:
         if comp in components:
             ok = check_port('127.0.0.1', port)
             result.append(('PASS' if ok else 'WARN', comp + ' port', f'127.0.0.1:{port}'))

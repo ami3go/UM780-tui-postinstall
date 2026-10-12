@@ -26,7 +26,7 @@ Two separate interactive approvals are required when Docker is absent: OpenHands
 }
 ```
 
-`ollama_bridge: false` disables a *previously managed* relay when rerunning the module; an unowned systemd unit is never overwritten. Port 3002 is reserved as the default so Open WebUI keeps 3000 and Uptime Kuma keeps 3001. Change the port only to an unused local port (a previous instance's port must be stopped before changing).
+`ollama_bridge: false` disables a *previously managed* relay when rerunning the module; an unowned systemd unit is never overwritten. Port 3002 is reserved as the default so Open WebUI keeps 3000 and Uptime Kuma keeps 3001. Change the port only to an unused local port (the managed systemd unit, health checks and new Bookmarks entries read the configured port; existing Bookmarks entries are additive and are not rewritten).
 
 ## Connect to GUI (SSH tunnel; no public network binding)
 
