@@ -2,7 +2,7 @@
 
 ## Scope and constraints
 
-This is a **single-host, bare-metal Debian 13 (x86_64) installer** tailored for the UM780 Pro. The installer itself is Python 3.11+ standard library plus external OS utilities (`apt-get`, `systemctl`, `lsblk`, `mount`, `git`, `cmake`). It selects Debian packages, downloads vendor releases, configures native systemd services and checks runtime state. It has no Docker orchestration, config transaction manager, installer-level scheduler or generalized hardware discovery engine.
+This is a **single-host, bare-metal Debian 13 (x86_64) installer** tailored for the UM780 Pro. The installer itself is Python 3.11+ standard library plus external OS utilities (`apt-get`, `systemctl`, `lsblk`, `mount`, `git`, `cmake`). It selects Debian packages, downloads vendor releases, configures native systemd services and checks runtime state. It has no Docker orchestration by default (the optional OpenHands module is a documented, user-approved Docker exception), config transaction manager, installer-level scheduler or generalized hardware discovery engine.
 
 ## Execution path
 

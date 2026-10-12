@@ -49,6 +49,7 @@ DESCRIPTIONS = {
  'llm_benchmark': 'Compare llama.cpp CPU and Vulkan token throughput with an existing GGUF',
  'zram': 'Debian compressed RAM swap via zram-tools',
  'opencode': 'Verified OpenCode coding-agent CLI, no daemon or auth setup',
+ 'openhands': 'Opt-in OpenHands Docker GUI, GPT/Claude/Ollama selection; no credentials or auto-routing',
  'llama_swap': 'Verified llama-swap model router binary, no listener',
  'uptime_kuma': 'Pinned native Uptime Kuma on localhost:3001, first-login admin',
  'secure_ingress': 'Inspect enrolled Tailscale identity, manual HTTPS Serve setup',

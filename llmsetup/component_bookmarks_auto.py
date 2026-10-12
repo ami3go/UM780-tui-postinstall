@@ -16,6 +16,7 @@ import tempfile
 from datetime import datetime, timezone
 
 from .core import SetupError
+from .component_openhands import installed_port
 
 BOOKMARKS_PACKAGE = Path('/usr/share/cockpit/cockpit-bookmarks/manifest.json')
 BOOKMARKS_CONFIG = Path('/etc/cockpit/cockpit-bookmarks.json')
@@ -31,6 +32,8 @@ TTDY_BINARY = Path('/opt/llm-stack/bin/ttyd')
 # A web link is useful only in a browser that has the corresponding SSH -L
 # tunnel. 127.0.0.1 refers to the browser/client, NOT the server.
 WEB_APPS = (
+    ('openhands', 'OpenHands', 3002, 'http://127.0.0.1:3002/', '🛠️',
+     '/etc/systemd/system/llm-openhands.service', 'Private coding agent GUI; model/provider login required'),
     ('webui', 'Open WebUI', 3000, 'http://127.0.0.1:3000/', '🤖',
      '/etc/systemd/system/llm-webui.service', 'Ollama chat interface'),
     ('codeserver', 'code-server', 8443, 'http://127.0.0.1:8443/', '💻',
@@ -92,6 +95,9 @@ def _read_config(path=BOOKMARKS_CONFIG):
 def _web_entries(exists):
     for key, name, port, url, icon, unit, description in WEB_APPS:
         if exists(unit):
+            if key == 'openhands':
+                port = installed_port()
+                url = f'http://127.0.0.1:{port}/'
             yield {'id': 'um780-' + key, 'um780ManagedBy': MANAGED_BY,
                    'name': name, 'description': description +
                    '; requires SSH -L ' + str(port) + ':127.0.0.1:' + str(port) +

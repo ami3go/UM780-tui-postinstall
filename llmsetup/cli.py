@@ -135,7 +135,7 @@ def show_stages(cfg):
 def plan(cfg, chosen, states=None):
     states = states or {}
     print('=== UM780 DEBIAN 13 STAGED CHANGE PLAN ===')
-    print('Target: Debian 13 x86_64 bare metal. Native systemd; no Docker.')
+    print('Target: Debian 13 x86_64 bare metal. Native systemd by default; optional OpenHands explicitly requires Docker.')
     print('Execution follows stage priority and defined within-stage order.')
     counter = 0
     for stage in STAGES:

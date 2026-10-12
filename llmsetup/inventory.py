@@ -63,6 +63,7 @@ INSTALL = {
     'llm_benchmark': ('file:/opt/llm-stack/llama.cpp/build/bin/llama-bench',),
     'zram': ('package:zram-tools',),
     'opencode': ('file:/opt/llm-stack/bin/opencode',),
+    'openhands': ('bin:docker',),
     'llama_swap': ('file:/opt/llm-stack/bin/llama-swap',),
     'uptime_kuma': ('file:/opt/llm-stack/uptime-kuma/server/server.js',),
     'secure_ingress': ('bin:tailscale',),
@@ -79,6 +80,7 @@ RUNTIME_UNITS = {
     'novnc': 'llm-novnc.service', 'service_watchdog': 'llm-service-watchdog.timer',
     'backup_restore': 'llm-backup.timer', 'zram': 'zramswap.service',
     'uptime_kuma': 'llm-uptime-kuma.service',
+    'openhands': 'llm-openhands.service',
 }
 
 # Exact generated configuration units. A unit file is NOT proof of runtime or
@@ -96,6 +98,7 @@ UNIT_CONFIG = {
     'service_watchdog': ('llm-service-watchdog.service', 'llm-service-watchdog.timer'),
     'backup_restore': ('llm-backup.service', 'llm-backup.timer'),
     'uptime_kuma': ('llm-uptime-kuma.service',),
+    'openhands': ('llm-openhands.service',),
 }
 
 # No reliable, safe method to determine whether a particular *normal user* has
@@ -391,6 +394,10 @@ def configured(name, probe, cfg, installed):
         return probe.enabled('zramswap.service') and probe.file('/etc/default/zramswap')
     if name in PERSONAL_SETUP:
         return None
+    if name == 'openhands':
+        return (_managed_unit(probe, 'llm-openhands.service') and
+                _file_contains(probe, UNIT_ROOT / 'llm-openhands.service',
+                               '127.0.0.1:', '/var/run/docker.sock'))
     if name == 'llama_swap':
         return False  # binary installed, but router config and launch remain manual
     if name == 'uptime_kuma':
