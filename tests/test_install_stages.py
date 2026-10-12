@@ -25,7 +25,7 @@ class StageRegistryTests(unittest.TestCase):
         self.assertEqual(len(STAGES), 5)
         self.assertEqual([s.number for s in STAGES], [1, 2, 3, 4, 5])
         self.assertEqual(len(ORDER), len(set(ORDER)))
-        self.assertEqual(len(ORDER), 39)
+        self.assertEqual(len(ORDER), 40)
         self.assertEqual(list(ORDER), ALL)
         self.assertEqual(set(ORDER), set(DESCRIPTIONS))
         self.assertEqual(set(ORDER), set(INSTALLERS))

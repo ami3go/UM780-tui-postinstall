@@ -1,6 +1,6 @@
 # UM780-tui-postinstall
 
-A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal local-LLM server. Designed around a Minisforum UM780 Pro, Ryzen 7 7840HS / Radeon 780M, 64 GB RAM and two 512 GB NVMe drives. No Docker is installed by this project.
+A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal local-LLM server. Designed around a Minisforum UM780 Pro, Ryzen 7 7840HS / Radeon 780M, 64 GB RAM and two 512 GB NVMe drives. No Docker is installed by the default selection. The new **optional** `openhands` module explicitly asks permission to install/use Docker and requires a local Docker socket; see [OpenHands](docs/OPENHANDS.md).
 
 > **Status: PRE-RELEASE — unvalidated on the target hardware.** The GitHub Actions workflow tests Python logic on Ubuntu runners; it does not install the stack on Debian, exercise the Radeon GPU, verify login flows, or prove data safety across reboots. Back up both disks before first use. See [known limitations](docs/KNOWN_ISSUES.md) and [hardware acceptance checks](docs/ACCEPTANCE.md).
 
@@ -9,9 +9,10 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | Guide | Purpose |
 | --- | --- |
 | [Optional safety and status](docs/OPTIONAL_SAFETY.md) | Preflight, private config snapshots/manual restore, Cockpit service overview |
+| [OpenHands hybrid local/cloud setup](docs/OPENHANDS.md) | Opt-in Docker deployment with OpenAI GPT, Claude and a private Ollama bridge (manual model choice) | 
 | [Optional native applications](docs/OPTIONAL_NATIVE_APPS.md) | OpenCode, llama-swap, Uptime Kuma, ingress readiness and UPS/WOL |
 | [Optional maintenance tools](docs/OPTIONAL_MAINTENANCE.md) | NVMe health, Restic, watchdog, zram, developer tools and model benchmarks |
-| [Installed/configured software inventory](docs/INSTALL_INVENTORY.md) | Check all 39 modules before installation, inside TUI, and after each apply |
+| [Installed/configured software inventory](docs/INSTALL_INVENTORY.md) | Check all 40 modules before installation, inside TUI, and after each apply |
 | [Five-stage installation workflow](docs/INSTALL_STAGES.md) | Priority 1–5 grouping, per-step setup order, prerequisites, verification and CLI examples |
 | [Installation](docs/INSTALLATION.md) | Prerequisites, staged install, selecting existing second NVMe, first login |
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
@@ -46,7 +47,7 @@ sudo python3 install.py
 sudo python3 install.py --health
 ```
 
-**Existing software detection:** Run `python3 install.py --inventory` for all 39 modules, or `python3 install.py --inventory --stage 2` to inspect one stage including optional software. Add `--json` for machine-readable output. The TUI and installation plans now show installed/configured states and services' running state; successful module runs record verification evidence in the last-run report. Detection does not automatically skip installers or prove logins, GPU offload or backups. See [Inventory](docs/INSTALL_INVENTORY.md).
+**Existing software detection:** Run `python3 install.py --inventory` for all 40 modules, or `python3 install.py --inventory --stage 2` to inspect one stage including optional software. Add `--json` for machine-readable output. The TUI and installation plans now show installed/configured states and services' running state; successful module runs record verification evidence in the last-run report. Detection does not automatically skip installers or prove logins, GPU offload or backups. See [Inventory](docs/INSTALL_INVENTORY.md).
 
 **Installation priorities:** To install in controlled phases, run `python3 install.py --list-stages`, then `python3 install.py --plan --stage 1` and `sudo python3 install.py --apply --stage 1`, followed by stages 2–5. `--stage N` selects only modules already enabled in `config.json`; optional tools remain unchecked. The interactive TUI has five category screens. See [Staged installation](docs/INSTALL_STAGES.md).
 
@@ -87,6 +88,7 @@ sudo python3 install.py --health
 | `developer_tools` | Additional terminal Git and navigation tools |
 | `llm_benchmark` | Real llama-bench CPU/GPU throughput comparison (existing GGUF required) |
 | `zram` | zram-tools compressed swap in memory |
+| `openhands` | **Optional** Docker-backed local coding-agent GUI, SSH-only 127.0.0.1:3002, GPT/Claude/Ollama provider selection; no automated routing or credentials | 
 | `opencode` | Verified OpenCode AI coding agent binary; no automatic authentication |
 | `llama_swap` | Verified model router executable, no active listener by default |
 | `uptime_kuma` | Native, localhost-only Uptime Kuma on port 3001; first-login setup |
@@ -102,7 +104,7 @@ By default, each successful apply run also adds missing app cards to Cockpit Boo
 
 ## Access model
 
-Management and inference listeners are configured for **localhost only**. This does **not** provide direct LAN access by default; LAN and Tailscale access are via SSH forwarding unless you separately configure an authenticated ingress. From your client:
+Management and inference listeners are configured for **localhost only**, with one documented exception: the optional OpenHands → Ollama relay binds only to Docker's private bridge gateway so the container can reach native Ollama. This does **not** provide direct LAN access by default; LAN and Tailscale access are via SSH forwarding unless you separately configure an authenticated ingress. From your client:
 
 ```sh
 ssh -N -L 3000:127.0.0.1:3000 -L 11434:127.0.0.1:11434 \

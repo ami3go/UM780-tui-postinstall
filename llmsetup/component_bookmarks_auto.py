@@ -31,6 +31,8 @@ TTDY_BINARY = Path('/opt/llm-stack/bin/ttyd')
 # A web link is useful only in a browser that has the corresponding SSH -L
 # tunnel. 127.0.0.1 refers to the browser/client, NOT the server.
 WEB_APPS = (
+    ('openhands', 'OpenHands', 3002, 'http://127.0.0.1:3002/', '🛠️',
+     '/etc/systemd/system/llm-openhands.service', 'Private coding agent GUI; model/provider login required'),
     ('webui', 'Open WebUI', 3000, 'http://127.0.0.1:3000/', '🤖',
      '/etc/systemd/system/llm-webui.service', 'Ollama chat interface'),
     ('codeserver', 'code-server', 8443, 'http://127.0.0.1:8443/', '💻',

@@ -1,6 +1,6 @@
 # Five-stage Debian 13 post-install workflow
 
-The interactive installer now uses **five priority steps**. Every one of the 39 available modules belongs to exactly one category and has a deterministic installation order within it.
+The interactive installer now uses **five priority steps**. Every one of the 40 available modules belongs to exactly one category and has a deterministic installation order within it.
 
 **Important:** Priority means the recommended sequence for a new UM780 Pro. It does **not** mean every tool is essential, and it does not authorize automatic disk changes, extra model downloads, public interfaces or power management. The same original 18 modules remain selected by default; the other **21 modules remain opt-in**.
 
@@ -135,9 +135,13 @@ A user can also combine stages with repeated `--stage N` arguments. `--stage` an
 
 ## Dependency / safety contract
 
-- All 39 modules appear exactly once in the stage registry, `llmsetup/install_stages.py`.
+- All 40 modules appear exactly once in the stage registry, `llmsetup/install_stages.py`.
 - Installation execution follows stage number and the declared within-stage order, **not the order of CLI arguments**.
 - The planning output warns about recommended predecessors that were **not selected in the same run**; they may already exist from an earlier installation. These notes are not assertions about live system state.
 - The installer deliberately does **not** auto-install missing components, auto-format SSDs, enroll Tailscale, enable third-party agents, or initialize UPS power actions.
 - Stage completion is **not** tracked across independent installations yet. Validate prior stages using `sudo python3 install.py --health` and physical checks before proceeding.
 - The project is **pre-release**, with unresolved disk UUID, FileBrowser permission, supply-chain and bare-metal acceptance blockers. See [Known Issues](KNOWN_ISSUES.md).
+
+## Optional OpenHands Docker exception
+
+Stage 3 includes optional `openhands` after OpenCode. Requires previously installed Ollama for the default bridge; obtains explicit Docker-root consent and binds its UI only to localhost:3002. See [OpenHands](OPENHANDS.md) before selecting it.
