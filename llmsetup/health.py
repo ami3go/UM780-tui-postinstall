@@ -8,7 +8,7 @@ import subprocess
 import urllib.request
 from .core import detect_target
 
-MANAGEMENT_PORTS = (11434, 8081, 3000, 3001, 8082, 8443, 9090, 7681, 8888, 5901, 5902, 6080)
+MANAGEMENT_PORTS = (11434, 8081, 3000, 3001, 5000, 8082, 8443, 9090, 7681, 8888, 5901, 5902, 6080)
 
 SERVICE_MAP = {
  'llama': 'llm-llama.service', 'ollama': 'llm-ollama.service',
@@ -28,6 +28,14 @@ def probe(cmd, timeout=8):
         return p.returncode == 0, (p.stdout + p.stderr).strip()
     except (OSError, subprocess.TimeoutExpired) as exc:
         return False, str(exc)
+
+
+def _exists(path):
+    """Path.exists() can raise PermissionError on root-only state dirs (Python 3.13)."""
+    try:
+        return Path(path).exists()
+    except OSError:
+        return False
 
 
 def check_port(host, port):
@@ -78,7 +86,7 @@ def diagnostics(components=None):
         model_root = Path('/var/lib/llm-stack/models')
         import json
         conf = Path('/etc/llm-postinstall/storage.json')
-        if conf.exists():
+        if _exists(conf):
             try: model_root = Path(json.loads(conf.read_text()).get('model_storage', model_root))
             except (ValueError, OSError): pass
         need_mount = str(model_root).startswith('/srv/llm-data/')
@@ -88,7 +96,7 @@ def diagnostics(components=None):
         if component not in components: continue
         ok, _ = probe(['systemctl', 'is-active', '--quiet', service])
         enabled, _ = probe(['systemctl', 'is-enabled', '--quiet', service])
-        if component == 'llama' and not Path('/etc/llm-postinstall/llama.env').exists():
+        if component == 'llama' and not _exists('/etc/llm-postinstall/llama.env'):
             status = 'PENDING'
         elif component == 'llama' and not ok:
             status = 'PENDING'  # GGUF isn't configured yet

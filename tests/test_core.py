@@ -3,10 +3,11 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
-from llmsetup.core import (Runner, SetupError, github_asset, safe_model, sha256, stable_secret, OWNER_MARK)
+from llmsetup.core import (Runner, SetupError, github_asset, install_release_asset, safe_model, sha256, stable_secret, OWNER_MARK)
 from llmsetup.components import ALL, DESCRIPTIONS, managed
 from llmsetup.storage import partition_options, fstab_entry
 from llmsetup.cli import load_config, UI, plan
@@ -124,6 +125,23 @@ class TestCore(unittest.TestCase):
             r = Runner(Path(t)/'log')
             r.get_json = lambda url: {'tag_name':'v1','assets':[{'name':'a','digest':'sha256:'+'a'*64,'browser_download_url':'https://github.com/some/repo/releases/download/v1/a'}]}
             self.assertEqual(github_asset(r, 'some/repo', 'a')[2], 'a'*64)
+
+    def test_install_release_asset_matches_component_call_signature(self):
+        with tempfile.TemporaryDirectory() as t:
+            r = Runner(Path(t)/'log')
+            r.get_json = lambda url: {'tag_name':'v1','assets':[{'name':'a','digest':'sha256:'+'a'*64,'browser_download_url':'https://github.com/some/repo/releases/download/v1/a'}]}
+            r.download = mock.Mock(return_value=Path(t)/'cached')
+            tag, out = install_release_asset(r, 'some/repo', 'a')
+            self.assertEqual((tag, out), ('v1', Path(t)/'cached'))
+            self.assertEqual(r.download.call_args.args[0],
+                             'https://github.com/some/repo/releases/download/v1/a')
+            self.assertEqual(r.download.call_args.args[1], 'a'*64)
+
+    def test_assets_module_imports_before_core(self):
+        repo = Path(__file__).resolve().parents[1]
+        proc = subprocess.run([sys.executable, '-c', 'import llmsetup.assets'],
+                              cwd=repo, capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
 
     def test_safe_gguf_requires_existing_inside_root(self):
         with tempfile.TemporaryDirectory() as t:
