@@ -35,6 +35,8 @@ INSTALL = {
     'llama': ('file:/opt/llm-stack/llama.cpp/build/bin/llama-server',),
     'ollama': ('file:/opt/llm-stack/ollama/current/bin/ollama',),
     'webui': ('file:/opt/llm-stack/open-webui/venv/bin/open-webui',),
+    'webollama': ('file:/opt/llm-stack/webollama/venv/bin/gunicorn',
+                  'file:/opt/llm-stack/webollama/src/app.py'),
     'models': ('file:/usr/local/bin/ollama',),
     'cockpit': ('package:cockpit',),
     'cockpit_storage': ('package:cockpit-storaged', 'package:cockpit-packagekit'),
@@ -79,6 +81,7 @@ RUNTIME_UNITS = {
     'novnc': 'llm-novnc.service', 'service_watchdog': 'llm-service-watchdog.timer',
     'backup_restore': 'llm-backup.timer', 'zram': 'zramswap.service',
     'uptime_kuma': 'llm-uptime-kuma.service',
+    'webollama': 'llm-webollama.service',
 }
 
 # Exact generated configuration units. A unit file is NOT proof of runtime or
@@ -96,6 +99,7 @@ UNIT_CONFIG = {
     'service_watchdog': ('llm-service-watchdog.service', 'llm-service-watchdog.timer'),
     'backup_restore': ('llm-backup.service', 'llm-backup.timer'),
     'uptime_kuma': ('llm-uptime-kuma.service',),
+    'webollama': ('llm-webollama.service',),
 }
 
 # No reliable, safe method to determine whether a particular *normal user* has
@@ -397,6 +401,13 @@ def configured(name, probe, cfg, installed):
         return (_managed_unit(probe, 'llm-uptime-kuma.service') and
                 _file_contains(probe, UNIT_ROOT / 'llm-uptime-kuma.service',
                                'UPTIME_KUMA_HOST=127.0.0.1', 'UPTIME_KUMA_PORT=3001'))
+    if name == 'webollama':
+        unit = UNIT_ROOT / 'llm-webollama.service'
+        return (_managed_unit(probe, 'llm-webollama.service') and
+                _env_value(probe, CONFIG_ROOT / 'webollama.env', 'OLLAMA_API_BASE')
+                == 'http://127.0.0.1:11434' and
+                (_file_contains(probe, unit, '--bind 127.0.0.1:5000') or
+                 _file_contains(probe, unit, '--bind 0.0.0.0:5000')))
     if name == 'secure_ingress':
         return None  # no persistent setup done by this readiness check
     raise ValueError('No configuration detector for ' + name)

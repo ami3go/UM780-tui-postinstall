@@ -11,7 +11,7 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | [Optional safety and status](docs/OPTIONAL_SAFETY.md) | Preflight, private config snapshots/manual restore, Cockpit service overview |
 | [Optional native applications](docs/OPTIONAL_NATIVE_APPS.md) | OpenCode, llama-swap, Uptime Kuma, ingress readiness and UPS/WOL |
 | [Optional maintenance tools](docs/OPTIONAL_MAINTENANCE.md) | NVMe health, Restic, watchdog, zram, developer tools and model benchmarks |
-| [Installed/configured software inventory](docs/INSTALL_INVENTORY.md) | Check all 39 modules before installation, inside TUI, and after each apply |
+| [Installed/configured software inventory](docs/INSTALL_INVENTORY.md) | Check all 40 modules before installation, inside TUI, and after each apply |
 | [Five-stage installation workflow](docs/INSTALL_STAGES.md) | Priority 1–5 grouping, per-step setup order, prerequisites, verification and CLI examples |
 | [Installation](docs/INSTALLATION.md) | Prerequisites, staged install, selecting existing second NVMe, first login |
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
@@ -46,7 +46,7 @@ sudo python3 install.py
 sudo python3 install.py --health
 ```
 
-**Existing software detection:** Run `python3 install.py --inventory` for all 39 modules, or `python3 install.py --inventory --stage 2` to inspect one stage including optional software. Add `--json` for machine-readable output. The TUI and installation plans now show installed/configured states and services' running state; successful module runs record verification evidence in the last-run report. Detection does not automatically skip installers or prove logins, GPU offload or backups. See [Inventory](docs/INSTALL_INVENTORY.md).
+**Existing software detection:** Run `python3 install.py --inventory` for all 40 modules, or `python3 install.py --inventory --stage 2` to inspect one stage including optional software. Add `--json` for machine-readable output. The TUI and installation plans now show installed/configured states and services' running state; successful module runs record verification evidence in the last-run report. Detection does not automatically skip installers or prove logins, GPU offload or backups. See [Inventory](docs/INSTALL_INVENTORY.md).
 
 **Installation priorities:** To install in controlled phases, run `python3 install.py --list-stages`, then `python3 install.py --plan --stage 1` and `sudo python3 install.py --apply --stage 1`, followed by stages 2–5. `--stage N` selects only modules already enabled in `config.json`; optional tools remain unchecked. The interactive TUI has five category screens. See [Staged installation](docs/INSTALL_STAGES.md).
 
@@ -90,6 +90,7 @@ sudo python3 install.py --health
 | `opencode` | Verified OpenCode AI coding agent binary; no automatic authentication |
 | `llama_swap` | Verified model router executable, no active listener by default |
 | `uptime_kuma` | Native, localhost-only Uptime Kuma on port 3001; first-login setup |
+| `webollama` | Pinned [WebOllama](https://github.com/dkruyt/webollama) v1.1.0 under gunicorn on port 5000; **no login**, bind set by `webollama_bind` |
 | `secure_ingress` | Tailscale identity readiness check; explicitly configure Serve yourself |
 | `ups_wol` | Prepare source of Cockpit UPS/WOL appliance for manual dry-run setup |
 | `preflight` | Optional early-stage free space/storage-root and private Cockpit checks |

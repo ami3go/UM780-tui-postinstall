@@ -1,6 +1,6 @@
 # Five-stage Debian 13 post-install workflow
 
-The interactive installer now uses **five priority steps**. Every one of the 39 available modules belongs to exactly one category and has a deterministic installation order within it.
+The interactive installer now uses **five priority steps**. Every one of the 40 available modules belongs to exactly one category and has a deterministic installation order within it.
 
 **Important:** Priority means the recommended sequence for a new UM780 Pro. It does **not** mean every tool is essential, and it does not authorize automatic disk changes, extra model downloads, public interfaces or power management. The same original 18 modules remain selected by default; the other **21 modules remain opt-in**.
 
@@ -31,9 +31,10 @@ Goal: GPU drivers first, engines second, models and UI after prerequisites.
 | 2.3 | `llama` | Yes | Build llama.cpp with Vulkan | Select a real GGUF if you want to enable `llama-server` |
 | 2.4 | `models` | Yes | Offer Qwen Coder model download | Explicit approval, model size/storage check |
 | 2.5 | `webui` | Yes | Authenticated Open WebUI | First-login validation and Ollama connection |
-| 2.6 | `benchmarks` | Yes | CPU/system/Vulkan diagnostic packages | Review temperatures and resource baseline |
-| 2.7 | `llm_benchmark` | No | Actual llama-bench CPU vs Vulkan | Existing GGUF required; verify offload and tokens/sec |
-| 2.8 | `llama_swap` | No | Install router executable, **no running service** | Supply and validate model mapping before manually starting |
+| 2.6 | `webollama` | No | Pinned WebOllama model manager under gunicorn, port 5000 | **No login**; keep localhost unless `webollama_bind` is deliberately `0.0.0.0` |
+| 2.7 | `benchmarks` | Yes | CPU/system/Vulkan diagnostic packages | Review temperatures and resource baseline |
+| 2.8 | `llm_benchmark` | No | Actual llama-bench CPU vs Vulkan | Existing GGUF required; verify offload and tokens/sec |
+| 2.9 | `llama_swap` | No | Install router executable, **no running service** | Supply and validate model mapping before manually starting |
 
 **Exit check:** Ollama responds, a selected model generates text, GPU backend is verified rather than assumed, and the Open WebUI login works.
 
@@ -135,7 +136,7 @@ A user can also combine stages with repeated `--stage N` arguments. `--stage` an
 
 ## Dependency / safety contract
 
-- All 39 modules appear exactly once in the stage registry, `llmsetup/install_stages.py`.
+- All 40 modules appear exactly once in the stage registry, `llmsetup/install_stages.py`.
 - Installation execution follows stage number and the declared within-stage order, **not the order of CLI arguments**.
 - The planning output warns about recommended predecessors that were **not selected in the same run**; they may already exist from an earlier installation. These notes are not assertions about live system state.
 - The installer deliberately does **not** auto-install missing components, auto-format SSDs, enroll Tailscale, enable third-party agents, or initialize UPS power actions.

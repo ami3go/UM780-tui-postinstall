@@ -23,6 +23,7 @@ DESCRIPTIONS = {
  'llama': 'Build llama.cpp with Vulkan; optional GGUF service',
  'ollama': 'Ollama native service (localhost API, CPU fallback)',
  'webui': 'Open WebUI native Python 3.11 environment, authenticated',
+ 'webollama': 'Pinned WebOllama Ollama model manager on port 5000, NO login',
  'models': 'Opt-in Qwen2.5-Coder:7b model download (~several GB)',
  'cockpit': 'Cockpit management, loopback-only TLS socket',
  'cockpit_ghsync': 'Your GitHub Sync Cockpit page (manual gh login)',

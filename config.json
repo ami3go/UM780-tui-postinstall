@@ -5,6 +5,7 @@
   "model": "qwen2.5-coder:7b",
   "auto_bookmarks": true,
   "webui_bind": "127.0.0.1",
+  "webollama_bind": "127.0.0.1",
   "llama_model_path": "",
   "model_storage": "/var/lib/llm-stack/models",
   "tunnel_note": "All HTTP services are localhost-only. Use ssh tunnels or explicitly configure authenticated Tailscale Serve."

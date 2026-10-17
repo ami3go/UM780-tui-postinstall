@@ -41,6 +41,8 @@ WEB_APPS = (
      '/etc/systemd/system/llm-jupyterlab.service', 'Token-authenticated Python notebooks'),
     ('uptime_kuma', 'Uptime Kuma', 3001, 'http://127.0.0.1:3001/', '📈',
      '/etc/systemd/system/llm-uptime-kuma.service', 'Local monitoring and notifications; create admin on first visit'),
+    ('webollama', 'WebOllama', 5000, 'http://127.0.0.1:5000/', '🦙',
+     '/etc/systemd/system/llm-webollama.service', 'Ollama model manager and chat; no login'),
     ('novnc', 'noVNC Desktop', 6080, 'http://127.0.0.1:6080/vnc.html', '🖥️',
      '/etc/systemd/system/llm-novnc.service', 'Virtual XFCE desktop with generated VNC password; retrieve with sudo cat /etc/llm-postinstall/novnc-vnc-password on the server'),
 )

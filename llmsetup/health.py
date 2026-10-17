@@ -18,6 +18,7 @@ SERVICE_MAP = {
  'jupyterlab': 'llm-jupyterlab.service', 'novnc': 'llm-novnc.service',
  'service_watchdog': 'llm-service-watchdog.timer',
  'uptime_kuma': 'llm-uptime-kuma.service',
+ 'webollama': 'llm-webollama.service',
  'zram': 'zramswap.service', 'backup_restore': 'llm-backup.timer'
 }
 
@@ -158,6 +159,13 @@ def diagnostics(components=None):
         ok=check_port('127.0.0.1',3001)
         result.append(('PASS' if ok else 'WARN','uptime-port',
                        '127.0.0.1:3001 (TCP; authentication not verified)'))
+    if 'webollama' in components:
+        local = check_port('127.0.0.1', 5000)
+        unit = Path('/etc/systemd/system/llm-webollama.service')
+        lan = unit.is_file() and '--bind 0.0.0.0:5000' in unit.read_text()
+        result.append(('WARN' if lan or not local else 'PASS', 'webollama-port',
+                       ('0.0.0.0:5000 LAN-exposed with NO authentication' if lan
+                        else '127.0.0.1:5000 (TCP; no authentication)') + f'; reachable={local}'))
     if 'tailscale' in components:
         ok, out = probe(['tailscale', 'status', '--json'])
         status = 'WARN'

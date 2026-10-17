@@ -1,11 +1,11 @@
 # Installed / configured software verification
 
-The UM780 Debian 13 installer can now **inspect the local machine without changing it**. Each of the 39 components is reported separately: a binary or Debian package being present is not proof of a configured, running service, and an active service is not proof its login/model/permissions are correct.
+The UM780 Debian 13 installer can now **inspect the local machine without changing it**. Each of the 40 components is reported separately: a binary or Debian package being present is not proof of a configured, running service, and an active service is not proof its login/model/permissions are correct.
 
 ## Inspect the machine
 
 ```sh
-# All 39 components, selected and optional, grouped in canonical install order
+# All 40 components, selected and optional, grouped in canonical install order
 python3 install.py --inventory
 
 # JSON for scripts or offline review (no passwords, tokens, or config values)

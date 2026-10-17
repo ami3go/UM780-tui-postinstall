@@ -19,7 +19,7 @@ BACKUP_SOURCES = ('/etc/llm-postinstall', '/var/lib/llm-postinstall', '/etc/cock
 KNOWN_UNITS = ('llm-ollama.service', 'llm-webui.service', 'llm-llama.service',
                'llm-codeserver.service', 'llm-filebrowser.service',
                'llm-jupyterlab.service', 'llm-novnc-vnc.service',
-               'llm-novnc.service', 'cockpit.socket')
+               'llm-novnc.service', 'llm-webollama.service', 'cockpit.socket')
 
 
 def hardware_health(r, cfg, ui):

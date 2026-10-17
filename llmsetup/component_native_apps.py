@@ -11,8 +11,9 @@ import re
 import shutil
 import tarfile
 
-from .core import ROOT_DIR, SetupError, ensure_dir
+from .core import CONF_DIR, ROOT_DIR, SetupError, ensure_dir, stable_secret
 from .component_base import managed, unit
+from .component_llms import _install_uv
 from .component_optional_tools import _release_binary, _atomic_binary_from_stream
 
 
@@ -138,6 +139,80 @@ WantedBy=multi-user.target
 """)
     print('Uptime Kuma on http://127.0.0.1:3001 (SSH forwarded). Create admin on first login.')
     print('Set monitors/notifications manually; no public listener or notification secret auto-added.')
+
+
+WEBOLLAMA_TAG = 'v1.1.0'
+WEBOLLAMA_SHA = '77069d30a3619aa76a51405801ab4c31222bd962'
+WEBOLLAMA_REPO = 'https://github.com/dkruyt/webollama.git'
+WEBOLLAMA_PORT = 5000
+WEBOLLAMA_BINDS = ('127.0.0.1', '0.0.0.0')
+
+
+def webollama_bind(cfg):
+    bind = cfg.get('webollama_bind', '127.0.0.1')
+    if bind not in WEBOLLAMA_BINDS:
+        raise SetupError('webollama_bind must be 127.0.0.1 or 0.0.0.0')
+    return bind
+
+
+def webollama(r, cfg, ui):
+    """Pinned WebOllama under gunicorn; upstream app.run() enables the Flask debugger."""
+    bind = webollama_bind(cfg)
+    r.apt('git', 'ca-certificates')
+    uv = _install_uv(r)
+    prefix = ROOT_DIR / 'webollama'
+    source = prefix / 'src'
+    if prefix.is_symlink() or source.is_symlink():
+        raise SetupError('WebOllama path is a symlink')
+    ensure_dir(prefix, mode=0o755)
+    prefix.chmod(0o755)
+    if not source.exists():
+        r.run(['git', 'clone', '--depth', '1', '--branch', WEBOLLAMA_TAG, WEBOLLAMA_REPO, str(source)])
+    if not (source / '.git').is_dir():
+        raise SetupError('WebOllama source not a Git repository')
+    head = r.run(['git', '-C', str(source), 'rev-parse', 'HEAD'], capture=True).stdout.strip()
+    if head != WEBOLLAMA_SHA:
+        raise SetupError('WebOllama checkout does not match pinned release commit')
+    remote = r.run(['git', '-C', str(source), 'remote', 'get-url', 'origin'], capture=True).stdout.strip()
+    if remote != WEBOLLAMA_REPO:
+        raise SetupError('Unexpected WebOllama checkout origin')
+    venv = prefix / 'venv'
+    gunicorn = venv / 'bin/gunicorn'
+    if not gunicorn.is_file():
+        env = dict(os.environ, UV_PYTHON_INSTALL_DIR=str(ROOT_DIR / 'uv-python'),
+                   UV_PYTHON_PREFERENCE='managed')
+        r.run([str(uv), 'python', 'install', '3.11'], env=env)
+        r.run([str(uv), 'venv', '--python', '3.11', str(venv)], env=env)
+        r.run([str(uv), 'pip', 'install', '--python', str(venv / 'bin/python'),
+               '-r', str(source / 'requirements.txt'), 'gunicorn==26.2.0'], env=env)
+    if not gunicorn.is_file():
+        raise SetupError('gunicorn missing from WebOllama environment')
+    r.account('webollama')
+    secret = stable_secret(CONF_DIR / 'webollama-secret')
+    env_changed = r.write(CONF_DIR / 'webollama.env', managed(f'''SECRET_KEY={secret}
+OLLAMA_API_BASE=http://127.0.0.1:11434
+'''), mode=0o600)
+    unit(r, 'llm-webollama.service', f"""[Unit]
+Description=WebOllama Ollama model manager (no authentication)
+After=network.target llm-ollama.service
+Wants=llm-ollama.service
+[Service]
+User=webollama
+WorkingDirectory={source}
+EnvironmentFile={CONF_DIR}/webollama.env
+ExecStart={gunicorn} --chdir {source} --workers 1 --threads 8 --timeout 0 --no-control-socket --bind {bind}:{WEBOLLAMA_PORT} app:app
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+[Install]
+WantedBy=multi-user.target
+""", force_restart=env_changed)
+    print(f'WebOllama on http://{bind}:{WEBOLLAMA_PORT}/ with NO login: anyone reaching it can pull/delete models.')
+    if bind != '127.0.0.1':
+        print('WARNING: listening on all interfaces by explicit webollama_bind; restrict with a firewall.')
 
 
 UPS_REPO = 'https://github.com/ami3go/cockpit-ups-wol.git'

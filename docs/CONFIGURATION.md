@@ -8,11 +8,12 @@ This file describes the **current code behavior**, not proposed settings. The si
 | --- | --- | --- | --- |
 | `target_os` | `"debian-13"` | Yes | Must match exactly, not a general-purpose distro selector |
 | `host` | `"bare-metal"` | Yes | VMs and containers rejected by preflight |
-| `components` | 18 selected; 21 additional optional | Yes | TUI initially checks each item; see component order below |
+| `components` | 18 selected; 22 additional optional | Yes | TUI initially checks each item; see component order below |
 | `backup_repository` | Not set | Optional | Existing separately mounted Restic repository path; until configured module only installs CLI |
 | `auto_bookmarks` | `true` | Yes | After an apply run, merge missing application cards if Cockpit Bookmarks is installed; disable to opt out |
 | `model` | `"qwen2.5-coder:7b"` | Yes | For `models`, only prefixes `qwen2.5-coder:` and `qwen3-coder:` pass the current basic check |
 | `webui_bind` | `"127.0.0.1"` | **No** | Informational only; listener address is hardcoded in the service |
+| `webollama_bind` | `"127.0.0.1"` | Yes | WebOllama listener: `127.0.0.1` or `0.0.0.0` only. `0.0.0.0` exposes an **unauthenticated** model manager to the LAN |
 | `llama_model_path` | `""` | Yes | Optional existing GGUF path under selected `models/gguf/`; also set by `--gguf` |
 | `model_storage` | `"/var/lib/llm-stack/models"` | Yes | Used unless valid `/etc/llm-postinstall/storage.json` overrides it |
 | `tunnel_note` | Descriptive text | **No** | Informational, not a network policy |
@@ -26,7 +27,7 @@ The canonical component order is defined in `llmsetup/install_stages.py` and dri
 | Step | Stage name | Component order |
 | ---: | --- | --- |
 | 1 | Essential system and data safety | `preflight`, `base`, `config_snapshot`, `storage`, `hardware_health`, `updates`, `zram` |
-| 2 | Local LLM engines and models | `vulkan`, `ollama`, `llama`, `models`, `webui`, `benchmarks`, `llm_benchmark`, `llama_swap` |
+| 2 | Local LLM engines and models | `vulkan`, `ollama`, `llama`, `models`, `webui`, `webollama`, `benchmarks`, `llm_benchmark`, `llama_swap` |
 | 3 | Administration and development | `cockpit`, `cockpit_storage`, `cockpit_ghsync`, `cockpit_bookmarks`, `cockpit_status`, `filebrowser`, `codeserver`, `fish`, `btop`, `mc`, `developer_tools`, `opencode`, `agent_of_empires`, `jupyterlab`, `ttyd` |
 | 4 | Remote access and virtual desktop | `tailscale`, `secure_ingress`, `vnc`, `novnc` |
 | 5 | Monitoring, backups and automation | `backup_restore`, `service_watchdog`, `uptime_kuma`, `ups_wol`, `bookmark_sync` |
@@ -47,7 +48,7 @@ The 18 default-selected components in `config.json` remain unchanged. Before ins
 | `--health` | Read-only service, Vulkan, mount and port checks (details in [Operations](OPERATIONS.md)) |
 | `--apply` | Skip module checklist and run chosen modules; root required |
 | `--component NAME` | Select one module; repeat flag for additional modules; runs in canonical priority order |
-| `--inventory` | Read-only local installed/configured/running scan; all 39 modules by default, or filter by `--stage`/`--component` |
+| `--inventory` | Read-only local installed/configured/running scan; all 40 modules by default, or filter by `--stage`/`--component` |
 | `--json` | Machine-readable output only with `--inventory`; no passwords or tokens included |
 | `--stage N` | Select only default-enabled software in stage N (1–5); repeatable; cannot combine with `--component` |
 | `--list-stages` | Print all five categories, default/optional status and software descriptions; read-only |
@@ -108,6 +109,7 @@ All locations are host-side; SSH forward to view from another machine. The liste
 | `/opt/llm-stack/llama.cpp/` | Source/build |
 | `/opt/llm-stack/ollama/` | Versioned Ollama binary distribution |
 | `/opt/llm-stack/open-webui/venv/` | Open WebUI virtual environment |
+| `/opt/llm-stack/webollama/` | Pinned WebOllama source (`src/`) and venv |
 | `/opt/llm-stack/uv-python/` | uv-managed Python install |
 | `/var/lib/llm-stack/models/` | Default root for Ollama and GGUF files |
 | `/srv/llm-data/models/` | Model root when existing second-disk filesystem mounted |
