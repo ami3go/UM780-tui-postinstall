@@ -6,7 +6,7 @@
     ["Open WebUI", "llm-webui.service"], ["code-server", "llm-codeserver.service"],
     ["FileBrowser Quantum", "llm-filebrowser.service"], ["JupyterLab", "llm-jupyterlab.service"],
     ["noVNC Desktop", "llm-novnc-vnc.service"], ["noVNC Web Proxy", "llm-novnc.service"],
-    ["Uptime Kuma", "llm-uptime-kuma.service"], ["Service Watchdog", "llm-service-watchdog.timer"],
+    ["Uptime Kuma", "llm-uptime-kuma.service"], ["WebOllama", "llm-webollama.service"], ["Service Watchdog", "llm-service-watchdog.timer"],
     ["Backups", "llm-backup.timer"], ["Cockpit", "cockpit.socket"]
   ];
   const grid = document.getElementById("status");

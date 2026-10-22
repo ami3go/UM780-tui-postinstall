@@ -144,7 +144,7 @@ Keep sanitized terminal output, hashes, logs, CI URLs, version inventory and sto
 
 ## Staged installer workflow acceptance
 
-- [ ] `--list-stages` lists all 39 modules exactly once in five priorities, with the 18 default selections unchanged.
+- [ ] `--list-stages` lists all 40 modules exactly once in five priorities, with the 18 default selections unchanged.
 - [ ] `--plan --stage 1` through `--plan --stage 5` show only the corresponding default-enabled modules, never activate unchecked software.
 - [ ] Multiple `--stage` flags deduplicate software and preserve canonical dependency order regardless of argument ordering.
 - [ ] Whiptail and numbered fallback visit all five categories; cancel aborts all changes and manually toggled optional modules remain selected only by explicit consent.
@@ -154,7 +154,7 @@ Keep sanitized terminal output, hashes, logs, CI URLs, version inventory and sto
 
 ## Existing software inventory acceptance
 
-- [ ] `--inventory` reports all 39 modules without mutation, including unchecked optional tools, and `--inventory --stage N` includes all components in the requested priority category.
+- [ ] `--inventory` reports all 40 modules without mutation, including unchecked optional tools, and `--inventory --stage N` includes all components in the requested priority category.
 - [ ] Inventory differentiates missing installations, binary only, stale configuration only, binary plus configuration, unavailable model API and per-user setup uncertainty.
 - [ ] No secret contents are emitted in terminal/JSON output or post-install evidence. Scanning without root performs no privileged writes or service actions.
 - [ ] TUI preserves its on/off checkbox defaults while displaying current software state; the install plan reports status and runtime without treating an active port as proof of login.

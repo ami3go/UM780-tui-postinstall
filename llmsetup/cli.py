@@ -110,12 +110,10 @@ def load_config(path):
     # Preserve the authorized storage decision across single-module reruns.
     persisted = CONF_DIR / 'storage.json'
     try:
-        has_persisted = persisted.is_file() and not persisted.is_symlink()
-    except PermissionError:
-        # CONF_DIR is root-only (0700); non-root read-only runs such as
-        # --plan and --inventory fall back to the configured model root.
-        has_persisted = False
-    if has_persisted:
+        persisted_state = persisted.is_file() and not persisted.is_symlink()
+    except OSError:
+        persisted_state = False  # unprivileged read-only run with a root-only state directory
+    if persisted_state:
         saved_root = json.loads(persisted.read_text()).get('model_storage')
         if saved_root in ('/srv/llm-data/models', '/var/lib/llm-stack/models'):
             data['model_storage'] = saved_root

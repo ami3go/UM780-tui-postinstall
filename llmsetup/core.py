@@ -187,4 +187,13 @@ def safe_model(path, root):
     return (p.is_absolute() and p.suffix.lower() == '.gguf' and p.is_file()
             and not p.is_symlink() and not r.is_symlink() and r.resolve() in p.resolve().parents)
 
-from .assets import sha256, github_asset, install_release_asset
+_ASSET_EXPORTS = ('sha256', 'github_asset', 'install_release_asset')
+
+
+def __getattr__(name):
+    # Lazy re-export: assets imports SetupError from this module, so a direct
+    # import here would break when assets is imported before core.
+    if name in _ASSET_EXPORTS:
+        from . import assets
+        return getattr(assets, name)
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')

@@ -39,7 +39,7 @@ sudo python3 install.py --apply --component cockpit
 sudo python3 install.py --apply --component cockpit_status
 ```
 
-Open **Cockpit → Tools → UM780 Status** and use Refresh. The static plugin page displays the results of regular unprivileged `systemctl is-active` commands for Ollama, llama.cpp, WebUI, code-server, FileBrowser, JupyterLab, noVNC, Uptime Kuma, watchdog, backup timer and Cockpit. It uses Cockpit's existing login/session, requires no separate daemon, exposes no new TCP port, reads no credential files and has no privileged mutation actions.
+Open **Cockpit → Tools → UM780 Status** and use Refresh. The static plugin page displays the results of regular unprivileged `systemctl is-active` commands for Ollama, llama.cpp, WebUI, code-server, FileBrowser, JupyterLab, noVNC, Uptime Kuma, WebOllama, watchdog, backup timer and Cockpit. It uses Cockpit's existing login/session, requires no separate daemon, exposes no new TCP port, reads no credential files and has no privileged mutation actions.
 
 A green `active` unit is **not** proof that a model can generate tokens, that auth works, that a backup can restore, that the GPU is used, or that the disk is healthy. Use `sudo python3 install.py --health` and the hardware acceptance checklist.
 

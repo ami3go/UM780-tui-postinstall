@@ -72,9 +72,9 @@ class FakeProbe:
 
 
 class StatusTests(unittest.TestCase):
-    def test_all_39_modules_have_detection_rules(self):
+    def test_all_40_modules_have_detection_rules(self):
         self.assertEqual(set(inventory.INSTALL), set(ALL))
-        self.assertEqual(len(inventory.INSTALL),39)
+        self.assertEqual(len(inventory.INSTALL),40)
         states=inventory.scan(ALL,{},FakeProbe())
         self.assertEqual(set(states),set(ALL))
         self.assertTrue(all(isinstance(state, inventory.ComponentState)
@@ -276,7 +276,7 @@ class InventoryCLITests(unittest.TestCase):
              redirect_stdout(output):
             result=cli.main(['--inventory'])
         self.assertEqual(result,0)
-        self.assertEqual(len(scanner.call_args.args[0]),39)
+        self.assertEqual(len(scanner.call_args.args[0]),40)
         self.assertIn('novnc',output.getvalue())
         self.assertIn('MISSING',output.getvalue())
 

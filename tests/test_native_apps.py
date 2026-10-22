@@ -64,6 +64,22 @@ class NativeAppsTests(unittest.TestCase):
             apps.llama_swap(r,{},None)
         r.service.assert_not_called()
 
+    def test_webollama_pinned_and_unselected(self):
+        selected=json.loads((Path(__file__).parents[1]/'config.json').read_text())['components']
+        self.assertIn('webollama', INSTALLERS)
+        self.assertNotIn('webollama', selected)
+        self.assertEqual(apps.WEBOLLAMA_REPO,'https://github.com/dkruyt/webollama.git')
+        self.assertRegex(apps.WEBOLLAMA_SHA,'^[0-9a-f]{40}$')
+
+    def test_webollama_bind_defaults_local_and_rejects_others(self):
+        self.assertEqual(apps.webollama_bind({}),'127.0.0.1')
+        self.assertEqual(apps.webollama_bind({'webollama_bind':'0.0.0.0'}),'0.0.0.0')
+        for bad in ('192.168.1.5','::','',None):
+            with self.assertRaises(SetupError):
+                apps.webollama_bind({'webollama_bind':bad})
+        with self.assertRaises(SetupError):
+            apps.webollama(mock.Mock(),{'webollama_bind':'10.0.0.1'},None)
+
     def test_ups_repo_preparation_not_auto_install(self):
         self.assertIn('cockpit-ups-wol',apps.UPS_REPO)
         self.assertNotIn('install.sh --silent',apps.ups_wol.__doc__ or '')

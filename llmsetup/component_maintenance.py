@@ -19,7 +19,7 @@ BACKUP_SOURCES = ('/etc/llm-postinstall', '/var/lib/llm-postinstall', '/etc/cock
 KNOWN_UNITS = ('llm-ollama.service', 'llm-webui.service', 'llm-llama.service',
                'llm-codeserver.service', 'llm-filebrowser.service',
                'llm-jupyterlab.service', 'llm-novnc-vnc.service',
-               'llm-novnc.service', 'cockpit.socket')
+               'llm-novnc.service', 'llm-webollama.service', 'cockpit.socket')
 
 
 def hardware_health(r, cfg, ui):
@@ -29,9 +29,9 @@ def hardware_health(r, cfg, ui):
               'Collected: ' + datetime.now(timezone.utc).isoformat()]
     for cmd in (['nvme', 'list'], ['smartctl', '--scan-open'], ['sensors']):
         result = r.run(cmd, capture=True, check=False, timeout=25)
-        report.append('\\n$ ' + ' '.join(cmd) + '\\n' + result.stdout[:15000])
+        report.append('\n$ ' + ' '.join(cmd) + '\n' + result.stdout[:15000])
     out = Path('/var/log/llm-postinstall/hardware-health.txt')
-    r.write(out, '\\n'.join(report) + '\\n', mode=0o600)
+    r.write(out, '\n'.join(report) + '\n', mode=0o600)
     print('Hardware report: ' + str(out))
     print('For actual SSD self-tests inspect nvme smart-log /dev/nvme0 and /dev/nvme1 manually.')
 
@@ -212,5 +212,5 @@ def llm_benchmark(r, cfg, ui):
         report.extend(['', 'GPU layers: ' + str(layers), 'returncode: ' + str(outcome.returncode),
                        outcome.stdout[:25000]])
     output = Path('/var/log/llm-postinstall/llm-benchmark.txt')
-    r.write(output, '\\n'.join(report) + '\\n', mode=0o600)
+    r.write(output, '\n'.join(report) + '\n', mode=0o600)
     print('Benchmark report saved to ' + str(output) + '; inspect CPU/Vulkan numbers and logs.')

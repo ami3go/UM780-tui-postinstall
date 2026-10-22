@@ -54,7 +54,7 @@ def sha256(path):
     return h.hexdigest()
 
 
-def github_asset(r: Runner, repo: str, asset_name: str, *, version=None):
+def github_asset(r, repo: str, asset_name: str, *, version=None):
     url = f'https://api.github.com/repos/{repo}/releases/' + ('tags/' + version if version else 'latest')
     data = r.get_json(url)
     for asset in data['assets']:
