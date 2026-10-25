@@ -37,10 +37,10 @@ class GpuLabTests(unittest.TestCase):
     def test_install_adds_packages_and_account_without_container_side_effects(self):
         r = FakeRunner()
         user = SimpleNamespace(pw_uid=1002, pw_dir=str(gpu_lab.LAB_HOME))
-        with mock.patch.object(gpu_lab.pwd, "getpwnam", side_effect=[KeyError, user]), \\
-             mock.patch.object(gpu_lab.grp, "getgrnam", return_value=object()), \\
-             mock.patch.object(gpu_lab.LAB_HOME, "exists", return_value=False), \\
-             mock.patch.object(gpu_lab.LAB_HOME, "is_symlink", return_value=False), \\
+        with mock.patch.object(gpu_lab.pwd, "getpwnam", side_effect=[KeyError, user]), \
+             mock.patch.object(gpu_lab.grp, "getgrnam", return_value=object()), \
+             mock.patch.object(gpu_lab.LAB_HOME, "exists", return_value=False), \
+             mock.patch.object(gpu_lab.LAB_HOME, "is_symlink", return_value=False), \
              mock.patch.object(gpu_lab.LAB_HOME, "is_dir", return_value=True):
             gpu_lab.gpu_lab(r, {}, None)
         self.assertIn("distrobox", r.pkgs)
@@ -78,9 +78,9 @@ class GpuLabTests(unittest.TestCase):
             gpu_lab.create_args("unsafe", home)
 
     def test_preexisting_box_is_not_overwritten(self):
-        with mock.patch.object(gpu_lab.shutil, "which", return_value="/usr/bin/tool"), \\
+        with mock.patch.object(gpu_lab.shutil, "which", return_value="/usr/bin/tool"), \
              mock.patch.object(gpu_lab.subprocess, "run",
-                               return_value=SimpleNamespace(returncode=0)), \\
+                               return_value=SimpleNamespace(returncode=0)), \
              mock.patch.object(gpu_lab, "_run") as runner:
             gpu_lab._create("llm-cpu")
             runner.assert_not_called()
@@ -99,8 +99,8 @@ class GpuLabTests(unittest.TestCase):
             bench = Path(directory) / "llama-bench"
             bench.write_text("binary placeholder")
             ui = SimpleNamespace(ask=lambda _: str(model))
-            with mock.patch.object(gpu_lab, "LLAMA_BENCH", bench), \\
-                 mock.patch.object(gpu_lab.Path, "home", return_value=Path(directory)), \\
+            with mock.patch.object(gpu_lab, "LLAMA_BENCH", bench), \
+                 mock.patch.object(gpu_lab.Path, "home", return_value=Path(directory)), \
                  mock.patch.object(gpu_lab, "_run", return_value='{"test":true}') as run:
                 gpu_lab._benchmark(ui)
             output = sorted((Path(directory) / "gpu-lab-results").glob("*.json"))
