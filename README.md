@@ -11,7 +11,8 @@ A **native, modular Debian 13 (Trixie) post-install CLI/TUI** for a bare-metal l
 | [Optional safety and status](docs/OPTIONAL_SAFETY.md) | Preflight, private config snapshots/manual restore, Cockpit service overview |
 | [Optional native applications](docs/OPTIONAL_NATIVE_APPS.md) | OpenCode, llama-swap, Uptime Kuma, ingress readiness and UPS/WOL |
 | [Optional maintenance tools](docs/OPTIONAL_MAINTENANCE.md) | NVMe health, Restic, watchdog, zram, developer tools and model benchmarks |
-| [Installed/configured software inventory](docs/INSTALL_INVENTORY.md) | Check all 40 modules before installation, inside TUI, and after each apply |
+| [Optional GPU LLM Lab](docs/GPU_LLM_LAB.md) | Rootless Distrobox CPU/Vulkan profiles, GPU diagnostics and GGUF comparison |
+| [Installed/configured software inventory](docs/INSTALL_INVENTORY.md) | Check all 41 modules before installation, inside TUI, and after each apply |
 | [Five-stage installation workflow](docs/INSTALL_STAGES.md) | Priority 1–5 grouping, per-step setup order, prerequisites, verification and CLI examples |
 | [Installation](docs/INSTALLATION.md) | Prerequisites, staged install, selecting existing second NVMe, first login |
 | [Configuration](docs/CONFIGURATION.md) | Exact JSON keys, flags, module dependencies, default ports/paths |
@@ -37,6 +38,8 @@ git clone https://github.com/ami3go/UM780-tui-postinstall.git
 cd UM780-tui-postinstall
 python3 install.py --inventory  # inspect installed/configured state read-only
 python3 install.py --plan
+# Optional: inspect GPU lab module (no change by default)
+python3 install.py --plan --component gpu_lab
 python3 -m unittest discover -s tests -v
 # Stage modules one at a time after reading docs/INSTALLATION.md:
 sudo python3 install.py --apply --component base
@@ -46,7 +49,9 @@ sudo python3 install.py
 sudo python3 install.py --health
 ```
 
-**Existing software detection:** Run `python3 install.py --inventory` for all 40 modules, or `python3 install.py --inventory --stage 2` to inspect one stage including optional software. Add `--json` for machine-readable output. The TUI and installation plans now show installed/configured states and services' running state; successful module runs record verification evidence in the last-run report. Detection does not automatically skip installers or prove logins, GPU offload or backups. See [Inventory](docs/INSTALL_INVENTORY.md).
+**Existing software detection:** Run `python3 install.py --inventory` for all 41 modules, or `python3 install.py --inventory --stage 2` to inspect one stage including optional software. Add `--json` for machine-readable output. The TUI and installation plans now show installed/configured states and services' running state; successful module runs record verification evidence in the last-run report. Detection does not automatically skip installers or prove logins, GPU offload or backups. See [Inventory](docs/INSTALL_INVENTORY.md).
+
+**GPU LLM Lab (optional):** Check `gpu_lab` in Stage 2 or run `sudo python3 install.py --apply --component gpu_lab`. The component installs rootless Podman/Distrobox prerequisites and provisions `llm-lab` without changing existing services. Log into `llm-lab`, then run `python3 /path/to/UM780-tui-postinstall/install.py --gpu-lab` for its interactive CPU/Vulkan profile menu, GPU checks and sequential benchmarks. See [GPU Lab guide](docs/GPU_LLM_LAB.md). Distrobox is not a security sandbox; physical 780M offload remains unverified.
 
 **Installation priorities:** To install in controlled phases, run `python3 install.py --list-stages`, then `python3 install.py --plan --stage 1` and `sudo python3 install.py --apply --stage 1`, followed by stages 2–5. `--stage N` selects only modules already enabled in `config.json`; optional tools remain unchecked. The interactive TUI has five category screens. See [Staged installation](docs/INSTALL_STAGES.md).
 
