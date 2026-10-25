@@ -276,7 +276,7 @@ class InventoryCLITests(unittest.TestCase):
              redirect_stdout(output):
             result=cli.main(['--inventory'])
         self.assertEqual(result,0)
-        self.assertEqual(len(scanner.call_args.args[0]),40)
+        self.assertEqual(len(scanner.call_args.args[0]),41)
         self.assertIn('novnc',output.getvalue())
         self.assertIn('MISSING',output.getvalue())
 
