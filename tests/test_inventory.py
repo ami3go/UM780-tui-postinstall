@@ -72,9 +72,9 @@ class FakeProbe:
 
 
 class StatusTests(unittest.TestCase):
-    def test_all_40_modules_have_detection_rules(self):
+    def test_all_41_modules_have_detection_rules(self):
         self.assertEqual(set(inventory.INSTALL), set(ALL))
-        self.assertEqual(len(inventory.INSTALL),40)
+        self.assertEqual(len(inventory.INSTALL),41)
         states=inventory.scan(ALL,{},FakeProbe())
         self.assertEqual(set(states),set(ALL))
         self.assertTrue(all(isinstance(state, inventory.ComponentState)
