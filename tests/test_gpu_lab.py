@@ -39,9 +39,9 @@ class GpuLabTests(unittest.TestCase):
         user = SimpleNamespace(pw_uid=1002, pw_dir=str(gpu_lab.LAB_HOME))
         with mock.patch.object(gpu_lab.pwd, "getpwnam", side_effect=[KeyError, user]), \
              mock.patch.object(gpu_lab.grp, "getgrnam", return_value=object()), \
-             mock.patch.object(gpu_lab.LAB_HOME, "exists", return_value=False), \
-             mock.patch.object(gpu_lab.LAB_HOME, "is_symlink", return_value=False), \
-             mock.patch.object(gpu_lab.LAB_HOME, "is_dir", return_value=True):
+             mock.patch.object(Path, "exists", return_value=False), \
+             mock.patch.object(Path, "is_symlink", return_value=False), \
+             mock.patch.object(Path, "is_dir", return_value=True):
             gpu_lab.gpu_lab(r, {}, None)
         self.assertIn("distrobox", r.pkgs)
         self.assertIn("podman", r.pkgs)
