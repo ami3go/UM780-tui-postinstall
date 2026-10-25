@@ -48,6 +48,7 @@ DESCRIPTIONS = {
  'service_watchdog': 'Read-only periodic systemd service health journal alerts',
  'developer_tools': 'Git/terminal tools rg, fd, fzf, lazygit, zoxide',
  'llm_benchmark': 'Compare llama.cpp CPU and Vulkan token throughput with an existing GGUF',
+ 'gpu_lab': 'Optional rootless Distrobox GPU lab: CPU/Vulkan profiles and benchmarks',
  'zram': 'Debian compressed RAM swap via zram-tools',
  'opencode': 'Verified OpenCode coding-agent CLI, no daemon or auth setup',
  'llama_swap': 'Verified llama-swap model router binary, no listener',
