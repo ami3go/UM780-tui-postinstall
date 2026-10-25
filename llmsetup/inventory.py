@@ -63,6 +63,7 @@ INSTALL = {
     'service_watchdog': ('file:/usr/local/libexec/um780-service-check.py',),
     'developer_tools': ('bin:rg', 'bin:fdfind', 'bin:fzf', 'bin:lazygit', 'bin:zoxide'),
     'llm_benchmark': ('file:/opt/llm-stack/llama.cpp/build/bin/llama-bench',),
+    'gpu_lab': ('package:podman', 'package:distrobox', 'package:crun', 'package:uidmap'),
     'zram': ('package:zram-tools',),
     'opencode': ('file:/opt/llm-stack/bin/opencode',),
     'llama_swap': ('file:/opt/llm-stack/bin/llama-swap',),
@@ -391,6 +392,11 @@ def configured(name, probe, cfg, installed):
                 and probe.enabled('llm-service-watchdog.timer'))
     if name == 'llm_benchmark':
         return probe.file('/var/log/llm-postinstall/llm-benchmark.txt')
+    if name == 'gpu_lab':
+        return (_file_contains(probe, CONFIG_ROOT / 'gpu-lab.conf',
+                               'LAB_USER=llm-lab', 'ROOTLESS=true')
+                and probe.directory('/var/lib/llm-lab')
+                and probe.command(['id', '-u', 'llm-lab'])[0])
     if name == 'zram':
         return probe.enabled('zramswap.service') and probe.file('/etc/default/zramswap')
     if name in PERSONAL_SETUP:
@@ -449,6 +455,7 @@ def inspect(name, cfg=None, probe=None):
             'preflight': 'Report presence; earlier results may be stale',
             'config_snapshot': 'Archive presence; restore integrity not checked here',
             'llm_benchmark': 'Report presence; GPU performance not evaluated here',
+            'gpu_lab': 'Rootless lab account/config only; GPU access and container behavior unverified',
         }.get(name, 'File/package and local configuration evidence only')
         return ComponentState(name, installed, configuration, active, description)
     except (OSError, ValueError, TypeError, PermissionError) as exc:
