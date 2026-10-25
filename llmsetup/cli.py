@@ -246,12 +246,18 @@ def main(argv=None):
     p.add_argument('--stage', action='append', type=int, choices=[s.number for s in STAGES], help='Install default-selected modules in priority stage N (1..5); repeatable')
     p.add_argument('--list-stages', action='store_true', help='Read-only catalog of priorities, setup and optional modules')
     p.add_argument('--inventory', action='store_true', help='Read-only scan: installed/configured/running for all modules (or --stage/--component)')
+    p.add_argument('--gpu-lab', action='store_true', help='Manage isolated CPU/Vulkan Distroboxes as unprivileged llm-lab user')
     p.add_argument('--json', action='store_true', help='JSON inventory output; only with --inventory')
     p.add_argument('--yes', action='store_true', help='Accept ordinary prompts; never bypass typed storage UUID')
     p.add_argument('--restore-config', metavar='SNAPSHOT', help='Explicit config-only restore (requires typed RESTORE)')
     p.add_argument('--gguf', metavar='PATH', help='Use local GGUF inside selected model root and enable llama-server')
     args = p.parse_args(argv)
     try:
+        if args.gpu_lab:
+            if args.apply or args.plan or args.inventory or args.stage or args.component or args.restore_config or args.health:
+                raise SetupError('--gpu-lab is an interactive standalone mode')
+            from .gpu_lab import gpu_lab_menu
+            return gpu_lab_menu(UI(False))
         if args.restore_config:
             if not is_root():
                 raise SetupError('Configuration restore requires root')

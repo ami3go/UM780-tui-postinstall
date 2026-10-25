@@ -25,7 +25,7 @@ class StageRegistryTests(unittest.TestCase):
         self.assertEqual(len(STAGES), 5)
         self.assertEqual([s.number for s in STAGES], [1, 2, 3, 4, 5])
         self.assertEqual(len(ORDER), len(set(ORDER)))
-        self.assertEqual(len(ORDER), 40)
+        self.assertEqual(len(ORDER), 41)
         self.assertEqual(list(ORDER), ALL)
         self.assertEqual(set(ORDER), set(DESCRIPTIONS))
         self.assertEqual(set(ORDER), set(INSTALLERS))
@@ -65,6 +65,8 @@ class StageRegistryTests(unittest.TestCase):
         self.assertEqual(actual,[n for n in ORDER if n in selected and n in self.cfg['components']])
         self.assertEqual(len(actual),len(set(actual)))
         self.assertNotIn('backup_restore',actual)
+        self.assertIn('gpu_lab', ALL)
+        self.assertNotIn('gpu_lab', self.cfg['components'])
 
     def test_individual_modules_are_sorted_without_added_prerequisites(self):
         self.assertEqual(ordered_selection(['models','ollama','models']),['ollama','models'])

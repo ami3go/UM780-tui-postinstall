@@ -8,4 +8,5 @@ from .component_native_apps import opencode, llama_swap, uptime_kuma, secure_ing
 from .component_maintenance import hardware_health, backup_restore, cockpit_storage, service_watchdog, developer_tools, llm_benchmark, zram
 from .component_optional_tools import fish, btop, mc, ttyd, agent_of_empires, jupyterlab, vnc, novnc
 from .component_addons import cockpit, filebrowser, codeserver, tailscale, updates, benchmarks
+from .gpu_lab import gpu_lab
 INSTALLERS = {name: globals()[name] for name in ALL}
